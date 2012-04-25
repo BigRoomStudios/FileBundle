@@ -1,0 +1,18 @@
+parameters:
+    admin.nav:
+        file:
+            label: Files
+            route: brs_file_fileadmin_index
+            pages:
+                index:
+                    label: Browse Files
+                    route: brs_file_fileadmin_index
+                edit:
+                    label: Edit File
+                    route: brs_file_fileadmin_edit
+                    params:
+                        id: 0
+                    hidden: true
+                new:
+                    label: Add New File
+                    route: brs_file_fileadmin_new
