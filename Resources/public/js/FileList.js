@@ -46,6 +46,8 @@ var FileList = ListWidget.create({
 					
 					$new_row.find('.name-placeholder').replaceWith(file.name);
 					
+					$new_row.find('.type-placeholder').replaceWith(file.type);
+					
 					var progress = '<div class="progress progress-striped active" style="width:100px;"><div class="bar" style="width: 0%;"></div></div>';
 					
 					
@@ -63,20 +65,12 @@ var FileList = ListWidget.create({
 					.success(function (result, textStatus, jqXHR) {})
 					.error(function (jqXHR, textStatus, errorThrown) {
 						
+						$this.started = 0;
+						
 						$this.refresh_data();
 						
 						alert(jqXHR.responseText);
-						
-						/*var upload_file = jqXHR.data.files[0];
-						$.each($this.files, function (index, file) {
-					
-							if(file.name == upload_file.name){
-								
-								file.$row.detach();
-								
-								//console.log(upload_file.name + ': progress: ' + progress);
-							}
-						});*/
+				
 					})
 					.complete(function (result, textStatus, jqXHR) {});
 			},

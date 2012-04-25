@@ -29,6 +29,7 @@ class FileList extends ListWidget
 					'name' => 'brs_file_fileadmin_edit',
 					'params' => array('id'),
 				),
+				'nav' => true,
 				'label' => 'edit',
 				'width' => 120,
 				'nonentity' => true,
@@ -36,7 +37,11 @@ class FileList extends ListWidget
 			),
 			
 			'name' => array(
-				'type' => 'text',
+				'type' => 'link',
+				'route' => array(
+					'name' => 'brs_file_file_download',
+					'params' => array('id'),
+				),
 			),
 			
 			'type' => array(

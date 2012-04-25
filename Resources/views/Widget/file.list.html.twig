@@ -1,6 +1,6 @@
 {% extends 'BRSCoreBundle:Widget:list.html.twig' %}
 {% block list_actions %}
-<span class="btn btn-small btn-success btn-file list-action" name="upload" data-route="{{ path(route, { 'name':name, 'route':'delete_selected' }) }}"><i class="icon-upload icon-white"></i> {{ 'Upload' | trans }}<input class="list-file-input" type="file" name="form[file]" data-url="{{ path('brs_file_fileupload_upload') }}" multiple></span>
+<span class="btn btn-small btn-success btn-file list-action" name="upload"><i class="icon-upload icon-white"></i> {{ 'Upload' | trans }}<input class="list-file-input" type="file" name="form[file]" data-url="{{ path('brs_file_file_upload') }}" multiple></span>
 
 <div class="btn-group list-action">
 	<button class="btn btn-small" name="select_all" data-route="{{ path(route, { 'name':name, 'route':'select_all' }) }}">{{ 'Select All' | trans }}</button>

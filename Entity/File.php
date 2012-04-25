@@ -135,9 +135,14 @@ class File extends SuperEntity
 	
 	
 
+    public function getRealPath()
+    {
+        return $this->getUploadRootDir() . '/' . $this->id . '.' . $this->ext;
+    }
+	
     public function getWebPath()
     {
-        return null === $this->path ? null : $this->getUploadDir().'/'.$this->path;
+        return '/file/' . $this->id . '/' . $this->name;
     }
 
     protected function getUploadRootDir()
@@ -161,6 +166,8 @@ class File extends SuperEntity
         if (null !== $this->file) {
             $this->ext = $this->file->guessExtension();
 			$this->name = $this->file->getClientOriginalName();
+			$this->type = $this->file->getMimeType();
+			$this->size = $this->file->getClientSize();
         }
     }
 
@@ -177,7 +184,7 @@ class File extends SuperEntity
         // you must throw an exception here if the file cannot be moved
         // so that the entity is not persisted to the database
         // which the UploadedFile move() method does
-        $this->file->move($this->getUploadRootDir(), $this->id.'.'.$this->file->guessExtension());
+        $this->file->move($this->getRealPath());
 
         unset($this->file);
     }
