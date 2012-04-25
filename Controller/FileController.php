@@ -64,7 +64,9 @@ class FileController extends WidgetController
 		
 		$file = $this->getRepository('BRSFileBundle:File')->findOneById($id);
 		
-		$real_path = $file->getRealPath();
+		$real_path = $file->getAbsolutePath();
+		
+		//die($real_path);
 		
 		header("X-Sendfile: $real_path");
 	    header('Content-Type: application/octet-stream');
@@ -99,7 +101,7 @@ class FileController extends WidgetController
 		
 		$file = $this->getRepository('BRSFileBundle:File')->findOneById($id);
 		
-		$real_path = $file->getRealPath();
+		$real_path = $file->getAbsolutePath();
 	
 		header("X-Sendfile: $real_path");
 	    header('Content-Type: ' . $file->type);

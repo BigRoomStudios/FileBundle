@@ -134,8 +134,7 @@ class File extends SuperEntity
     public $file;
 	
 	
-
-    public function getRealPath()
+	public function getAbsolutePath()
     {
         return $this->getUploadRootDir() . '/' . $this->id . '.' . $this->ext;
     }
@@ -184,7 +183,7 @@ class File extends SuperEntity
         // you must throw an exception here if the file cannot be moved
         // so that the entity is not persisted to the database
         // which the UploadedFile move() method does
-        $this->file->move($this->getRealPath());
+        $this->file->move($this->getUploadRootDir(), $this->id . '.' . $this->ext);
 
         unset($this->file);
     }
@@ -199,10 +198,7 @@ class File extends SuperEntity
         }
     }
 
-    public function getAbsolutePath()
-    {
-        return null === $this->path ? null : $this->getUploadRootDir().'/'.$this->id.'.'.$this->ext;
-    }
+   
 	
     /**
      * Get id
