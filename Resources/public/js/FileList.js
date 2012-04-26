@@ -14,6 +14,8 @@ var FileList = ListWidget.create({
 		
 		this.started = 0;
 		
+		this.max_file_size = config.max_file_size;
+		
 		this.jqXHR = this.file_input.fileupload({
 			
 			dataType: 'json',
@@ -23,6 +25,11 @@ var FileList = ListWidget.create({
 			done: function (e, data) {
 				
 				$this.started --;
+				
+				if(data.result.status == 'fail' && data.result.errors.length > 0){
+					
+					alert(data.result.errors[0]);
+				}
 				
 				if($this.started == 0){
 				
@@ -40,6 +47,16 @@ var FileList = ListWidget.create({
 				
 				$.each(data.files, function (index, file) {
 					
+					if(file.size > $this.max_file_size){
+						
+						var size_in_mb = Math.round($this.max_file_size / 1024 / 1024 * 100)/100;
+						
+						alert('The file ' + file.name + ' is too big.  The max allowed file size is ' + size_in_mb + 'MB');
+						
+						return;	
+					}
+					
+
 					$this.started ++;
 					
 					var $new_row = $this.add_row();
@@ -48,31 +65,64 @@ var FileList = ListWidget.create({
 					
 					$new_row.find('.type-placeholder').replaceWith(file.type);
 					
-					var progress = '<div class="progress progress-striped active" style="width:100px;"><div class="bar" style="width: 0%;"></div></div>';
-					
+					var progress = '<div class="progress progress-striped active"><div class="bar" style="width: 0%;"></div></div> <a class="btn btn-mini close" href="#">&times;</a>';
 					
 					$new_row.find('.edit-placeholder').replaceWith(progress);
 					
+					
+					
+					data.url = $this.file_input.data('url');
+					
+					var jqXHR = data.submit()
+						.success(function (result, textStatus, jqXHR) {
+							
+						})
+						.error(function (jqXHR, textStatus, errorThrown) {
+							
+							$this.started --;
+							
+							if($this.started == 0){
+								
+								$this.refresh_data();
+							}
+							
+							if (errorThrown === 'abort') {
+								
+					            //alert('File Upload has been canceled');
+					        
+					        }else{
+					        	
+								alert(jqXHR.responseText);
+							}
+					
+						})
+						.complete(function (result, textStatus, jqXHR) {
+							
+							$new_row.find('.progress .bar').width('100%');
+							$new_row.find('.progress').addClass('progress-success');
+							$new_row.find('.close').remove();
+							
+						});
+					
+					file.jqXHR = jqXHR;
+					
+					$new_row.find('.close').click(function(e){
+						
+						e.preventDefault();
+						
+						$new_row.detach();
+						
+						jqXHR.abort();
+						
+					});
+					
 					file.$row = $new_row;
 					
-				   	$this.files.push(file);
+					$this.files.push(file);
 					
 				});
 				
-				data.url = $this.file_input.data('url');
 				
-				var jqXHR = data.submit()
-					.success(function (result, textStatus, jqXHR) {})
-					.error(function (jqXHR, textStatus, errorThrown) {
-						
-						$this.started = 0;
-						
-						$this.refresh_data();
-						
-						alert(jqXHR.responseText);
-				
-					})
-					.complete(function (result, textStatus, jqXHR) {});
 			},
 			
 			progress: function (e, data) {

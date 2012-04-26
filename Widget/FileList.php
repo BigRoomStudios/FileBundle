@@ -65,6 +65,7 @@ class FileList extends ListWidget
 		
 		$add_vars = array(
 			'form' => $form->createView(),
+			'max_file_size' => (int)ini_get('upload_max_filesize') * 1024 * 1024,
 		);
 		
 		$vars = array_merge(parent::getVars($render), $add_vars);

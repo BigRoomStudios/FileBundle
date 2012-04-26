@@ -129,7 +129,10 @@ class File extends SuperEntity
     public $path;
 	
 	/**
-     * @Assert\File(maxSize="6000000")
+	 * upload size set to 512 MB
+	 * also need to set limit in php.ini upload_max_filesize and post_max_size
+	 * 
+     * @Assert\File(maxSize="536870912")
      */
     public $file;
 	

@@ -28,30 +28,52 @@ class FileController extends WidgetController
 	{
 		
 		$file = new File();
-	    $form = $this->createFormBuilder($file)
-	        ->add('file')
-	        ->getForm();
+		$form = $this->createFormBuilder($file)
+			->add('file')
+			->getForm();
 	
-	    if ($this->getRequest()->getMethod() === 'POST') {
-	        $form->bindRequest($this->getRequest());
-	        if ($form->isValid()) {
-	            $em = $this->getDoctrine()->getEntityManager();
+		if ($this->getRequest()->getMethod() === 'POST') {
+			
+			$form->bindRequest($this->getRequest());
+			
+			if ($form->isValid()) {
+				
+				$em = $this->getDoctrine()->getEntityManager();
 	
-	            $em->persist($file);
-	            $em->flush();
+				$em->persist($file);
+				
+				$em->flush();
 	
-	            return $this->jsonResponse((array)$file);
-	        }
-	    }
-		
-		$status = 'fail';
+				$values = array(
+					'status' => 'success',
+					'file' => $file,
+				);
+				
+				return $this->jsonResponse($values);
+				
+			}else{
+				
+				//$errors = $form->getErrors();
+				$errors = $this->getErrorMessages($form);
+				
+				
+				$values = array(
+					'status' => 'fail',
+					'errors' => $errors,
+				);
+				
+				return $this->jsonResponse($values);
+			}
+		}
 		
 		$values = array(
-			'status' => $status,
+			'status' => 'fail',
 		);
 	
 		return $this->jsonResponse($values);
 	}
+	
+	
 	
 	/**
 	 * handle a file download 
@@ -69,24 +91,24 @@ class FileController extends WidgetController
 		//die($real_path);
 		
 		header("X-Sendfile: $real_path");
-	    header('Content-Type: application/octet-stream');
-	    header('Content-Disposition: attachment; filename="' . $file->name . '"');
-	    header('Content-Transfer-Encoding: binary');
-	    exit;
+		header('Content-Type: application/octet-stream');
+		header('Content-Disposition: attachment; filename="' . $file->name . '"');
+		header('Content-Transfer-Encoding: binary');
+		exit;
 		
 		/*
 		header('Content-Description: File Transfer');
-	    header('Content-Type: application/octet-stream');
-	    header('Content-Disposition: attachment; filename="' . $file->name . '"');
-	    header('Content-Transfer-Encoding: binary');
-	    header('Expires: 0');
-	    header('Cache-Control: must-revalidate');
-	    header('Pragma: public');
-	    header('Content-Length: ' . $file->size);
-	    ob_clean();
-	    flush();
-	    @readfile($real_path);
-	    exit;
+		header('Content-Type: application/octet-stream');
+		header('Content-Disposition: attachment; filename="' . $file->name . '"');
+		header('Content-Transfer-Encoding: binary');
+		header('Expires: 0');
+		header('Cache-Control: must-revalidate');
+		header('Pragma: public');
+		header('Content-Length: ' . $file->size);
+		ob_clean();
+		flush();
+		@readfile($real_path);
+		exit;
 		*/ 	
 	}
 	
@@ -104,23 +126,23 @@ class FileController extends WidgetController
 		$real_path = $file->getAbsolutePath();
 	
 		header("X-Sendfile: $real_path");
-	    header('Content-Type: ' . $file->type);
-	    header('Content-Disposition: filename="' . $file->name . '"');
-	    exit;
+		header('Content-Type: ' . $file->type);
+		header('Content-Disposition: filename="' . $file->name . '"');
+		exit;
 		
 		/*
 		header('Content-Description: File Transfer');
-	    header('Content-Type: ' . $file->type);
-	    //header('Content-Disposition: attachment; filename="' . $file->name . '"');
-	    header('Content-Transfer-Encoding: binary');
-	    header('Expires: 0');
-	    header('Cache-Control: must-revalidate');
-	    header('Pragma: public');
-	    header('Content-Length: ' . $file->size);
-	    ob_clean();
-	    flush();
-	    @readfile($real_path);
-	    exit;
+		header('Content-Type: ' . $file->type);
+		//header('Content-Disposition: attachment; filename="' . $file->name . '"');
+		header('Content-Transfer-Encoding: binary');
+		header('Expires: 0');
+		header('Cache-Control: must-revalidate');
+		header('Pragma: public');
+		header('Content-Length: ' . $file->size);
+		ob_clean();
+		flush();
+		@readfile($real_path);
+		exit;
 		*/
 	}
 	
