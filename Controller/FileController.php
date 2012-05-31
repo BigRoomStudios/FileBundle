@@ -5,6 +5,7 @@ namespace BRS\FileBundle\Controller;
 use BRS\CoreBundle\Core\WidgetController;
 use BRS\CoreBundle\Core\Utility as BRS;
 
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -25,16 +26,27 @@ class FileController extends WidgetController
 	 * 
 	 */
 	public function uploadAction()
-	{
-		
+	{	
 		$file = new File();
 		$form = $this->createFormBuilder($file)
 			->add('file')
 			->getForm();
-	
-		if ($this->getRequest()->getMethod() === 'POST') {
+		
+		$request = $this->getRequest();
+		
+		if ($request->getMethod() === 'POST') {
 			
-			$form->bindRequest($this->getRequest());
+			
+			//strip everything but the csrf token from the request and just handle the file
+			
+			$form_post = $request->get('form');
+			
+			$params = array('form' => array('_token' => $form_post['_token']));
+			
+			$new_request = Request::create($request->getUri(), 'POST', $params, $_COOKIE, $_FILES, $_SERVER, $request->getContent());
+			
+			
+			$form->bindRequest($new_request);
 			
 			if ($form->isValid()) {
 				
@@ -74,7 +86,6 @@ class FileController extends WidgetController
 	}
 	
 	
-	
 	/**
 	 * handle a file download 
 	 *
@@ -83,35 +94,18 @@ class FileController extends WidgetController
 	 */
 	public function downloadAction($id)
 	{
-		
 		$file = $this->getRepository('BRSFileBundle:File')->findOneById($id);
 		
 		$real_path = $file->getAbsolutePath();
-		
-		//die($real_path);
 		
 		header("X-Sendfile: $real_path");
 		header('Content-Type: application/octet-stream');
 		header('Content-Disposition: attachment; filename="' . $file->name . '"');
 		header('Content-Transfer-Encoding: binary');
 		exit;
-		
-		/*
-		header('Content-Description: File Transfer');
-		header('Content-Type: application/octet-stream');
-		header('Content-Disposition: attachment; filename="' . $file->name . '"');
-		header('Content-Transfer-Encoding: binary');
-		header('Expires: 0');
-		header('Cache-Control: must-revalidate');
-		header('Pragma: public');
-		header('Content-Length: ' . $file->size);
-		ob_clean();
-		flush();
-		@readfile($real_path);
-		exit;
-		*/ 	
 	}
 	
+
 	/**
 	 * handle a file display request
 	 *
@@ -120,31 +114,74 @@ class FileController extends WidgetController
 	 */
 	public function fileAction($id, $name = null)
 	{
-		
 		$file = $this->getRepository('BRSFileBundle:File')->findOneById($id);
 		
-		$real_path = $file->getAbsolutePath();
-	
-		header("X-Sendfile: $real_path");
-		header('Content-Type: ' . $file->type);
-		header('Content-Disposition: filename="' . $file->name . '"');
-		exit;
+		$original_path = $file->getAbsolutePath();
 		
-		/*
-		header('Content-Description: File Transfer');
-		header('Content-Type: ' . $file->type);
-		//header('Content-Disposition: attachment; filename="' . $file->name . '"');
-		header('Content-Transfer-Encoding: binary');
-		header('Expires: 0');
-		header('Cache-Control: must-revalidate');
-		header('Pragma: public');
-		header('Content-Length: ' . $file->size);
-		ob_clean();
-		flush();
-		@readfile($real_path);
-		exit;
-		*/
+		$this->sendFile($original_path,  $file->type, $file->name);
 	}
+
+
+	/**
+	 * get a resized image for a given file
+	 * params is a set of image modifications separated with slashes like so:
+	 * image/163/502/502/crop/blur:3/quality:75/asdasda.jpg
+	 * 
+	 * @Route("/image/{id}/{width}/{height}/{params}", requirements={"id" = "\d+", "width" = "\d+", "height" = "\d+", "params" = ".*"})
+	 * 
+	 */
+	public function imageAction($id, $width, $height, $params = null)
+	{
+		$type =	'image/jpeg';
+			
+		$file = new File();
+		
+		$param_parts = explode('/', $params);
+		
+		$name = array_pop($param_parts);
+		
+		$pass_params = array();
+		
+		foreach($param_parts as $part){
+			
+			$part_parts = explode(':', $part);
+			
+			$pass_params[$part_parts[0]] = (isset($part_parts[1])) ? $part_parts[1] : true;
+		}
+		
+		$file->id = $id;
+		
+		$cache_path = $file->getResizedCachePath($width, $height, $pass_params);
+		
+		if(file_exists($cache_path)){
+				
+			$this->sendFile($cache_path, $type, $name);
+		
+		}else{
+				
+			$file = $this->getRepository('BRSFileBundle:File')->findOneById($id);
+			
+			$cache_path = $file->getResizedImage($width, $height, $pass_params);
+			
+			$this->sendFile($cache_path, $type, $name);
+		}
+	}
+
 	
+	protected function sendFile($path, $type, $name){
+		
+		if((!$path) || (!file_exists($path))){
+			
+			throw $this->createNotFoundException('This is not the file you\'re looking for...');
+			
+		}else{
+			
+			header("X-Sendfile: $path");
+			header("Content-Type: $type");
+			header('Content-Disposition: filename="' . $name . '"');
+			header('Content-Transfer-Encoding: binary');
+			exit;	
+		}
+	}
 	
 }

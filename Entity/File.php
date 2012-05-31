@@ -139,7 +139,7 @@ class File extends SuperEntity
 	
 	public function getAbsolutePath()
     {
-        return $this->getUploadRootDir() . '/' . $this->id . '.' . $this->ext;
+        return $this->getOriginalsDir() . '/' . $this->id . '.' . $this->ext;
     }
 	
     public function getWebPath()
@@ -147,18 +147,22 @@ class File extends SuperEntity
         return '/file/' . $this->id . '/' . $this->name;
     }
 
-    protected function getUploadRootDir()
+    public function getFilesRootDir()
     {
-        // the absolute directory path where uploaded documents should be saved
         return __DIR__.'/../../../../files';
     }
-
-    protected function getUploadDir()
+	
+    public function getCacheDir()
     {
-        // get rid of the __DIR__ so it doesn't screw when displaying uploaded doc/image in the view.
-        return '';
+        return $this->getFilesRootDir() . '/cache';
     }
 	
+    public function getOriginalsDir()
+    {
+        return $this->getFilesRootDir() . '/originals';
+    }
+
+    
 	/**
      * @ORM\PrePersist()
      * @ORM\PreUpdate()
@@ -186,7 +190,7 @@ class File extends SuperEntity
         // you must throw an exception here if the file cannot be moved
         // so that the entity is not persisted to the database
         // which the UploadedFile move() method does
-        $this->file->move($this->getUploadRootDir(), $this->id . '.' . $this->ext);
+        $this->file->move($this->getOriginalsDir(), $this->id . '.' . $this->ext);
 
         unset($this->file);
     }
@@ -201,7 +205,138 @@ class File extends SuperEntity
         }
     }
 
-   
+    /**
+     * Returns a cache name based on parameters
+     *
+     * @return string 
+     */
+    public function getCacheName($params)
+    {
+    	$ext = $this->ext;	
+			
+    	if($params['ext']){
+    		
+    		$ext = $params['ext'];
+    	}
+					
+    	return $this->id . '_' . md5(implode('', $params)) . '.' . $ext;
+	}
+	
+    /**
+     * Returns a cache name based on parameters
+     *
+     * @return string 
+     */
+    public function getCachePath($params)
+    {
+    	$cache_dir = $this->getCacheDir();
+			
+    	$cache_name = $this->getCacheName($params);
+		
+		return $cache_dir . '/' . $cache_name;
+	}
+	
+	/**
+     * Returns a path to a resized image for a specified widht and height
+     *
+     * @return string 
+     */
+    public function getResizedCachePath($width, $height, $params = null)
+    {
+		if(!isset($params['ext'])){
+			
+			$params['ext'] = 'jpg';
+		}	
+			
+		return $this->getCachePath(array_merge((array)$params, array('resize', $width, $height)));
+	}
+	
+    /**
+     * Creates a new resized image if necessary and returns a path to the cached file
+     *
+     * @return string 
+     */
+    public function getResizedImage($width, $height, $params = null)
+    {
+		
+		if(!$params){
+			
+			$params = array();
+		}
+			
+		if(!isset($params['ext'])){
+			
+			$params['ext'] = 'jpg';
+		}
+			
+		if(!isset($params['quality'])){
+			
+			$params['quality'] = 80;
+		}
+		
+		if(!isset($params['blur'])){
+			
+			$params['blur'] = 0.9;
+		}
+			
+		$real_path = $this->getAbsolutePath();
+		
+		$cache_path = $this->getResizedCachePath($width, $height, $params);
+		
+		if(!file_exists($cache_path)){
+			
+			$image = new \Imagick($real_path);
+			
+			$bestfit = false;
+			
+			if($width && $height){
+				
+				$bestfit = true;
+			}
+			
+			if(isset($params['crop'])){
+				
+				if(!($width && $height)){
+				
+					return false;
+				}
+				
+				// crop the image
+				
+				$geo = $image->getImageGeometry();
+				
+				if(($geo['width']/$width) < ($geo['height']/$height)){
+					
+				    $image->cropImage($geo['width'], floor($height*$geo['width']/$width), 0, (($geo['height']-($height*$geo['width']/$width))/2));
+				
+				}else{
+							
+				    $image->cropImage(ceil($width*$geo['height']/$height), $geo['height'], (($geo['width']-($width*$geo['height']/$height))/2), 0);
+				}
+				
+				$bestfit = false;
+			}
+		
+			$image->resizeImage($width, $height, \Imagick::FILTER_CATROM, $params['blur'], $bestfit);
+			
+			$image->setCompression(\Imagick::COMPRESSION_JPEG);
+			
+			$image->setCompressionQuality($params['quality']);
+			
+			$image->setImageFormat($params['ext']);
+			
+			$image->stripImage(); 
+			
+			$image->writeImage($cache_path);
+		}
+		
+		if(file_exists($cache_path)){
+			
+			return $cache_path;
+		}
+    }
+	
+
 	
     /**
      * Get id

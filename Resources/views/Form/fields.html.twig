@@ -1,0 +1,22 @@
+
+{% block file_upload_widget %}
+{% spaceless %}
+	<div class="file-upload-widget" id="{{ id }}">
+		<span class="btn btn-small btn-success btn-file" name="upload">
+			<i class="icon-upload icon-white"></i> 
+			&nbsp;{{ 'Upload' | trans }}
+			<input class="file-input" type="file" name="form[file]" data-url="{{ path('brs_file_file_upload') }}"/>
+			<input type="hidden" name="{{ full_name }}" value="{{ value }}"/>
+		</span>
+		<div class="progress progress-striped active hidden"><div class="bar" style="width: 0%;"></div></div> <a class="btn btn-mini close hidden" href="#">&times;</a>
+	</div>
+{% endspaceless %}
+<script language="JavaScript">
+	
+	var upload_widget = new FileUploadWidget({
+		container: '{{ id }}',
+		max_file_size: {{ attr.max_file_size }},
+	});
+	
+</script>
+{% endblock %}
