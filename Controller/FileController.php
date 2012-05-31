@@ -96,13 +96,20 @@ class FileController extends WidgetController
 	{
 		$file = $this->getRepository('BRSFileBundle:File')->findOneById($id);
 		
-		$real_path = $file->getAbsolutePath();
+		if(is_object($file)){
 		
-		header("X-Sendfile: $real_path");
-		header('Content-Type: application/octet-stream');
-		header('Content-Disposition: attachment; filename="' . $file->name . '"');
-		header('Content-Transfer-Encoding: binary');
-		exit;
+			$real_path = $file->getAbsolutePath();
+			
+			header("X-Sendfile: $real_path");
+			header('Content-Type: application/octet-stream');
+			header('Content-Disposition: attachment; filename="' . $file->name . '"');
+			header('Content-Transfer-Encoding: binary');
+			exit;
+			
+		}else{
+			
+			$this->fileNotFound();	
+		}
 	}
 	
 
@@ -116,9 +123,16 @@ class FileController extends WidgetController
 	{
 		$file = $this->getRepository('BRSFileBundle:File')->findOneById($id);
 		
-		$original_path = $file->getAbsolutePath();
-		
-		$this->sendFile($original_path,  $file->type, $file->name);
+		if(is_object($file)){
+			
+			$original_path = $file->getAbsolutePath();
+			
+			$this->sendFile($original_path,  $file->type, $file->name);
+			
+		}else{
+			
+			$this->fileNotFound();
+		}
 	}
 
 
@@ -161,18 +175,30 @@ class FileController extends WidgetController
 				
 			$file = $this->getRepository('BRSFileBundle:File')->findOneById($id);
 			
-			$cache_path = $file->getResizedImage($width, $height, $pass_params);
+			if(is_object($file)){
 			
-			$this->sendFile($cache_path, $type, $name);
+				$cache_path = $file->getResizedImage($width, $height, $pass_params);
+				
+				$this->sendFile($cache_path, $type, $name);
+				
+			}else{
+				
+				$this->fileNotFound();
+			}
 		}
 	}
 
+	
+	protected function fileNotFound(){
+		
+		throw $this->createNotFoundException('This is not the file you\'re looking for...');
+	}
 	
 	protected function sendFile($path, $type, $name){
 		
 		if((!$path) || (!file_exists($path))){
 			
-			throw $this->createNotFoundException('This is not the file you\'re looking for...');
+			$this->fileNotFound();
 			
 		}else{
 			
