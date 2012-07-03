@@ -36,6 +36,13 @@ class FileList extends ListWidget
 				'class' => 'btn btn-mini',
 			),
 			
+			'thumb' => array(
+				'type' => 'thumbnail',
+				'width' => 55,
+				'nonentity' => true,
+				'file_id_field' => 'id',
+			),
+			
 			'name' => array(
 				'type' => 'link',
 				'route' => array(
@@ -58,19 +65,45 @@ class FileList extends ListWidget
 	
 	public function getVars($render = true){
 		
-		$file = new File();
-	    $form = $this->createFormBuilder($file)
-	        ->add('file')
-	        ->getForm();
+		$form = $this->getFileUploadForm();
+		
+		//$upload_url = $this->generateUrl('brs_file_file_upload');
+		$upload_url = $this->getActionUrl('upload');
 		
 		$add_vars = array(
 			'form' => $form->createView(),
 			'max_file_size' => (int)ini_get('upload_max_filesize') * 1024 * 1024,
+			'upload_url' => $upload_url,
 		);
 		
 		$vars = array_merge(parent::getVars($render), $add_vars);
 		
 		return $vars;
 	}
+	
+	private function getFileUploadForm(){
+		
+		$file = new File();
+		
+		$form = $this->createFormBuilder($file)
+			->add('file')
+			->getForm();
+			
+		return $form;
+	}
+	
+	public function uploadAction()
+	{	
+		$form = $this->getFileUploadForm();
+		
+		$request = $this->getRequest();
+		
+		$file_repo = $this->getRepository('BRSFileBundle:File');
+		
+		$values = $file_repo->hanldeUploadRequest($request, $form);
+	
+		return $this->jsonResponse($values);
+	}
+
 }
 	

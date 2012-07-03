@@ -28,59 +28,16 @@ class FileController extends WidgetController
 	public function uploadAction()
 	{	
 		$file = new File();
+		
 		$form = $this->createFormBuilder($file)
 			->add('file')
 			->getForm();
 		
 		$request = $this->getRequest();
 		
-		if ($request->getMethod() === 'POST') {
-			
-			
-			//strip everything but the csrf token from the request and just handle the file
-			
-			$form_post = $request->get('form');
-			
-			$params = array('form' => array('_token' => $form_post['_token']));
-			
-			$new_request = Request::create($request->getUri(), 'POST', $params, $_COOKIE, $_FILES, $_SERVER, $request->getContent());
-			
-			
-			$form->bindRequest($new_request);
-			
-			if ($form->isValid()) {
-				
-				$em = $this->getDoctrine()->getEntityManager();
-	
-				$em->persist($file);
-				
-				$em->flush();
-	
-				$values = array(
-					'status' => 'success',
-					'file' => $file,
-				);
-				
-				return $this->jsonResponse($values);
-				
-			}else{
-				
-				//$errors = $form->getErrors();
-				$errors = $this->getErrorMessages($form);
-				
-				
-				$values = array(
-					'status' => 'fail',
-					'errors' => $errors,
-				);
-				
-				return $this->jsonResponse($values);
-			}
-		}
+		$file_repo = $this->getRepository('BRSFileBundle:File');
 		
-		$values = array(
-			'status' => 'fail',
-		);
+		$values = $file_repo->hanldeUploadRequest($request, $form);
 	
 		return $this->jsonResponse($values);
 	}

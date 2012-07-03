@@ -6,6 +6,7 @@ use BRS\CoreBundle\Core\SuperEntity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * BRS\FileBundle\Entity\File
@@ -335,6 +336,8 @@ class File extends SuperEntity
 			return $cache_path;
 		}
     }
+	
+	
 	
 
 	

@@ -3,6 +3,10 @@
 namespace BRS\FileBundle\Repository;
 
 use Doctrine\ORM\EntityRepository;
+use BRS\FileBundle\Entity\File;
+use BRS\CoreBundle\Core\Utility;
+
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * FileRepository
@@ -12,4 +16,59 @@ use Doctrine\ORM\EntityRepository;
  */
 class FileRepository extends EntityRepository
 {
+	
+	public function hanldeUploadRequest(\Symfony\Component\HttpFoundation\Request $request, $form){
+		
+		if ($request->getMethod() === 'POST') {
+			
+			
+			
+			
+			//strip everything but the csrf token from the request and just handle the file
+			
+			$form_post = $request->get('form');
+			
+			$params = array('form' => array('_token' => $form_post['_token']));
+			
+			$new_request = Request::create($request->getUri(), 'POST', $params, $_COOKIE, $_FILES, $_SERVER, $request->getContent());
+			
+			
+			$form->bindRequest($new_request);
+			
+			if ($form->isValid()) {
+				
+				$file = $form->getData();
+				
+				$em = $this->getEntityManager();
+	
+				$em->persist($file);
+				
+				$em->flush();
+	
+				$values = array(
+					'status' => 'success',
+					'file' => $file,
+				);
+				
+				return $values;
+				
+			}else{
+				
+				$errors = Utility::get_form_errors($form);
+				
+				$values = array(
+					'status' => 'fail',
+					'errors' => $errors,
+				);
+				
+				return $values;
+			}
+		}
+		
+		$values = array(
+			'status' => 'fail',
+		);
+		
+		return $values;
+	}
 }
