@@ -81,7 +81,7 @@ class FileList extends ListWidget
 		return $vars;
 	}
 	
-	private function getFileUploadForm(){
+	public function getFileUploadForm(){
 		
 		$file = new File();
 		

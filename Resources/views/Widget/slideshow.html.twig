@@ -1,0 +1,40 @@
+<div id="{{ div_id | default('file-slideshow') }}" class="{{ div_class | default('file-slideshow') }}">
+
+	<ul>
+	
+		{% for item in files %}
+		
+			<li><img class="{{ img_class | default('file-slideshow-image') }}" src="{{ path( 'brs_file_file_image', {'id':item.file_id, 'width':image_width|default(1000), 'height':image_height|default(500), params:'quality:75' }) }}" /></li>
+			
+		{% endfor %}
+	
+	</ul>
+	
+</div>
+
+<script language="JavaScript">
+	
+	$j.widgets['swiper'] = new Swipe($('#{{ div_id | default('file-slideshow') }}').get(0),{
+		startSlide: 0,
+		speed: 500,
+		auto: 3000,
+		margin: 20,
+		callback: function(event, index, elem) {
+			
+			//updateSlideIndicators();
+			
+			//window.location.hash = (index+1);
+		}
+	});
+	
+	//$j.widgets['swiper'].stop();
+	
+	$(function(){
+		
+		//updateSlideIndicators();
+	
+	})
+	
+
+	
+</script>
