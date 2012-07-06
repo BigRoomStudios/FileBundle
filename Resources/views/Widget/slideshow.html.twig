@@ -10,31 +10,19 @@
 	
 	</ul>
 	
+	<a class='slide-back' href="#">&lt</a>
+	<a class='slide-next' href="#">&gt</a>
+	
 </div>
 
 <script language="JavaScript">
 	
-	$j.widgets['swiper'] = new Swipe($('#{{ div_id | default('file-slideshow') }}').get(0),{
+	var slider = new SlideWidget({
+		id: '{{ div_id | default('file-slideshow') }}',
 		startSlide: 0,
 		speed: 500,
 		auto: 3000,
-		margin: 20,
-		callback: function(event, index, elem) {
-			
-			//updateSlideIndicators();
-			
-			//window.location.hash = (index+1);
-		}
+		margin: 20
 	});
-	
-	//$j.widgets['swiper'].stop();
-	
-	$(function(){
-		
-		//updateSlideIndicators();
-	
-	})
-	
-
 	
 </script>
