@@ -125,6 +125,20 @@ class File extends SuperEntity
     public $group_id;
 	
 	/**
+     * @var boolean $is_dir
+     *
+     * @ORM\Column(name="is_dir", type="boolean", nullable=true)
+     */
+    public $is_dir;
+	
+	/**
+     * @var integer $parent_id
+     *
+     * @ORM\Column(name="parent_id", type="integer", nullable=true)
+     */
+    public $parent_id;
+	
+	/**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
     public $path;
@@ -136,6 +150,19 @@ class File extends SuperEntity
      * @Assert\File(maxSize="536870912")
      */
     public $file;
+	
+	/**
+     * @ORM\ManyToOne(targetEntity="File")
+     * @ORM\JoinColumn(name="parent_id", referencedColumnName="id")
+     */
+    public $parent;
+	
+	/**
+     * @ORM\OneToMany(targetEntity="File", mappedBy="parent")
+	 * @ORM\OrderBy({"id" = "ASC"})
+     */
+    public $children;
+	
 	
 	
 	public function getAbsolutePath()
@@ -352,23 +379,23 @@ class File extends SuperEntity
     }
 
     /**
-     * Set filename
+     * Set name
      *
-     * @param string $filename
+     * @param string $name
      */
-    public function setFilename($filename)
+    public function setName($name)
     {
-        $this->filename = $filename;
+        $this->name = $name;
     }
 
     /**
-     * Get filename
+     * Get name
      *
-     * @return string 
+     * @return string
      */
-    public function getFilename()
+    public function getName()
     {
-        return $this->filename;
+        return $this->name;
     }
 
     /**
@@ -629,5 +656,25 @@ class File extends SuperEntity
     public function getGroupId()
     {
         return $this->group_id;
+    }
+
+    /**
+     * Set is_dir
+     *
+     * @param integer $is_dir
+     */
+    public function setIsDir($is_dir)
+    {
+        $this->is_dir = $is_dir;
+    }
+
+    /**
+     * Get is_dir
+     *
+     * @return is_dir 
+     */
+    public function getIsDir()
+    {
+        return $this->is_dir;
     }
 }

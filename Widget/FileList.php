@@ -104,6 +104,33 @@ class FileList extends ListWidget
 	
 		return $this->jsonResponse($values);
 	}
+	
+	public function newFolderAction()
+	{
+		$request = $this->getRequest();	
+			
+		if($request->getMethod() == 'GET'){
+			
+			$name = $request->get('name');	
+			
+			$file = new File();
+			
+			$file->setIsDir(true);
+			
+			$file->setName($name);
+				
+			$em = $this->getDoctrine()->getEntityManager();
+			
+			$em->persist($file);
+			
+			$em->flush();
+			
+			$values = array('name' => $name, 'id' => $file->getId(), 'is_dir' => true);
+		}
+		
+		return $this->jsonResponse($values);
+	}
+	
 
 }
 	

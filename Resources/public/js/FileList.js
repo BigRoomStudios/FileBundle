@@ -148,7 +148,22 @@ var FileList = ListWidget.create({
 		
 	},
 	
-	upload: function(target){
+	
+	
+	new_folder: function(target){
+		
+		
+		var href = $(target).data('route');
+		
+		var data = {name: 'test1234'}
+		
+		this.call(href, data, function(data){
+			
+			alert(data.id);
+			
+			//$this.enable_reordering();
+		});
+		//alert('here');
 		
 		//$(target).click();
 		
@@ -156,4 +171,6 @@ var FileList = ListWidget.create({
 		
 		this.file_input.click();*/
 	}
+	
+	
 });
