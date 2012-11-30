@@ -55,4 +55,73 @@ class FileAdminController extends AdminController
 		$this->addView('edit', $edit_widget);
 	}
 	
+	/**
+	 * Lists files for the root directory
+	 *
+	 * @Route("/")
+	 * @Template("BRSAdminBundle:Admin:default.html.twig")
+	 */
+	public function indexAction()
+	{
+		//die('test');	
+			
+		$view = $this->getView('index');
+		
+		$view->setFilters(
+			array(
+				array(
+					'filter' => 'f.parent_id is null',
+				)
+			)
+		);
+		
+		$view->handleRequest();
+		
+		$values = array(
+		
+			'view' => $view->render(),
+		);
+		
+		if($this->isAjax()){
+			
+			return $this->jsonResponse($values);
+		}
+		
+		$values = array_merge( $this->getViewValues(), $values );
+		
+		return $values;
+	}
+	
+	
+	/**
+	 * Lists files for a specified directory
+	 *
+	 * @Route("/{id}/list")
+	 * @Template("BRSAdminBundle:Admin:default.html.twig")
+	 */
+	public function listAction($id)
+	{
+		//die('test');	
+			
+		$view = $this->getView('index');
+		
+		$view->getById($id);
+		
+		$view->handleRequest();
+		
+		$values = array(
+		
+			'view' => $view->render(),
+		);
+		
+		if($this->isAjax()){
+			
+			return $this->jsonResponse($values);
+		}
+		
+		$values = array_merge( $this->getViewValues(), $values );
+		
+		return $values;
+	}
+	
 }

@@ -7,10 +7,12 @@ use BRS\CoreBundle\Core\SuperEntity;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\HttpFoundation\Request;
+use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
  * BRS\FileBundle\Entity\File
- *
+ * 
+ * @Gedmo\Tree(type="nested")
  * @ORM\Table()
  * @ORM\Entity(repositoryClass="BRS\FileBundle\Repository\FileRepository")
  * @ORM\HasLifecycleCallbacks
@@ -125,13 +127,6 @@ class File extends SuperEntity
     public $group_id;
 	
 	/**
-     * @var boolean $is_dir
-     *
-     * @ORM\Column(name="is_dir", type="boolean", nullable=true)
-     */
-    public $is_dir;
-	
-	/**
      * @var integer $parent_id
      *
      * @ORM\Column(name="parent_id", type="integer", nullable=true)
@@ -139,9 +134,50 @@ class File extends SuperEntity
     public $parent_id;
 	
 	/**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @var boolean $is_dir
+     *
+     * @ORM\Column(name="is_dir", type="boolean", nullable=true)
      */
-    public $path;
+    public $is_dir;
+	
+	
+	/**
+     * @Gedmo\TreeLeft
+     * @ORM\Column(name="tree_left", type="integer")
+     */
+    public $tree_left;
+
+    /**
+     * @Gedmo\TreeLevel
+     * @ORM\Column(name="tree_level", type="integer")
+     */
+    public $tree_level;
+
+    /**
+     * @Gedmo\TreeRight
+     * @ORM\Column(name="tree_right", type="integer")
+     */
+    public $tree_right;
+
+    /**
+     * @Gedmo\TreeRoot
+     * @ORM\Column(name="root", type="integer", nullable=true)
+     */
+    public $root;
+
+    /**
+     * @Gedmo\TreeParent
+     * @ORM\ManyToOne(targetEntity="File", inversedBy="children")
+     * @ORM\JoinColumn(name="parent_id", referencedColumnName="id", onDelete="CASCADE")
+     */
+    public $parent;
+
+    /**
+     * @ORM\OneToMany(targetEntity="File", mappedBy="parent")
+     * @ORM\OrderBy({"tree_left" = "ASC"})
+     */
+    public $children;
+	
 	
 	/**
 	 * upload size set to 512 MB
@@ -151,19 +187,12 @@ class File extends SuperEntity
      */
     public $file;
 	
-	/**
-     * @ORM\ManyToOne(targetEntity="File")
-     * @ORM\JoinColumn(name="parent_id", referencedColumnName="id")
-     */
-    public $parent;
-	
-	/**
-     * @ORM\OneToMany(targetEntity="File", mappedBy="parent")
-	 * @ORM\OrderBy({"id" = "ASC"})
-     */
-    public $children;
 	
 	
+	public function __construct()
+    {
+        $this->children = new \Doctrine\Common\Collections\ArrayCollection();
+    }
 	
 	public function getAbsolutePath()
     {
@@ -676,5 +705,145 @@ class File extends SuperEntity
     public function getIsDir()
     {
         return $this->is_dir;
+    }
+	
+    /**
+     * Set parent
+     *
+     * @param BRS\FileBundle\Entity\File $parent
+     */
+    public function setParent(\BRS\FileBundle\Entity\File $parent)
+    {
+        $this->parent = $parent;
+    }
+
+    /**
+     * Get parent
+     *
+     * @return BRS\FileBundle\Entity\File 
+     */
+    public function getParent()
+    {
+        return $this->parent;
+    }
+
+    /**
+     * Add children
+     *
+     * @param BRS\FileBundle\Entity\File $children
+     */
+    public function addFile(\BRS\FileBundle\Entity\File $children)
+    {
+        $this->children[] = $children;
+    }
+
+    /**
+     * Get children
+     *
+     * @return Doctrine\Common\Collections\Collection 
+     */
+    public function getChildren()
+    {
+        return $this->children;
+    }
+
+    /**
+     * Set parent_id
+     *
+     * @param integer $parentId
+     */
+    public function setParentId($parentId)
+    {
+        $this->parent_id = $parentId;
+    }
+
+    /**
+     * Get parent_id
+     *
+     * @return integer 
+     */
+    public function getParentId()
+    {
+        return $this->parent_id;
+    }
+
+    /**
+     * Set tree_left
+     *
+     * @param integer $treeLeft
+     */
+    public function setTreeLeft($treeLeft)
+    {
+        $this->tree_left = $treeLeft;
+    }
+
+    /**
+     * Get tree_left
+     *
+     * @return integer 
+     */
+    public function getTreeLeft()
+    {
+        return $this->tree_left;
+    }
+
+    /**
+     * Set tree_level
+     *
+     * @param integer $treeLevel
+     */
+    public function setTreeLevel($treeLevel)
+    {
+        $this->tree_level = $treeLevel;
+    }
+
+    /**
+     * Get tree_level
+     *
+     * @return integer 
+     */
+    public function getTreeLevel()
+    {
+        return $this->tree_level;
+    }
+
+    /**
+     * Set tree_right
+     *
+     * @param integer $treeRight
+     */
+    public function setTreeRight($treeRight)
+    {
+        $this->tree_right = $treeRight;
+    }
+
+    /**
+     * Get tree_right
+     *
+     * @return integer 
+     */
+    public function getTreeRight()
+    {
+        return $this->tree_right;
+    }
+
+    /**
+     * Set root
+     *
+     * @param integer $root
+     */
+    public function setRoot($root)
+    {
+        $this->root = $root;
+    }
+
+    /**
+     * Get root
+     *
+     * @return integer 
+     */
+    public function getRoot()
+    {
+        return $this->root;
     }
 }

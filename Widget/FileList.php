@@ -4,7 +4,7 @@ namespace BRS\FileBundle\Widget;
 
 use BRS\CoreBundle\Core\Widget\ListWidget;
 use BRS\FileBundle\Entity\File;
-
+use BRS\CoreBundle\Core\Utility as BRS;
 
 /**
  * File list widget
@@ -36,19 +36,21 @@ class FileList extends ListWidget
 				'class' => 'btn btn-mini',
 			),
 			
+			'tree' => array(
+				'type' => 'file.tree',
+				'width' => 120,
+				'nonentity' => true,
+			),
+			
 			'thumb' => array(
 				'type' => 'thumbnail',
-				'width' => 55,
+				'width' => 40,
 				'nonentity' => true,
 				'file_id_field' => 'id',
 			),
 			
 			'name' => array(
-				'type' => 'link',
-				'route' => array(
-					'name' => 'brs_file_file_download',
-					'params' => array('id'),
-				),
+				'type' => 'file.link',
 			),
 			
 			'type' => array(
@@ -57,6 +59,14 @@ class FileList extends ListWidget
 			
 			'title' => array(
 				'type' => 'text',
+			),
+			
+			'is_dir' => array(
+				'type' => 'hidden',
+			),
+			
+			'parent_id' => array(
+				'type' => 'hidden',
 			),
 		);
 		
@@ -78,7 +88,39 @@ class FileList extends ListWidget
 		
 		$vars = array_merge(parent::getVars($render), $add_vars);
 		
+		if($vars['entity_id']){
+			
+			$em = $this->getEntityManager();
+
+			$file_repo = $this->getRepository('BRSFileBundle:File');
+			
+			$file = $em->getReference('\BRS\FileBundle\Entity\File', $vars['entity_id']);
+			
+			//$file = $file_repo->findOneById($vars['entity_id']);
+			
+			$path = $file_repo->getPath($file);
+			
+			$vars['path'] = $path;
+			
+			//BRS::die_pre(count($path));
+			
+		}
+		
 		return $vars;
+	}
+	
+	public function getById($id){
+		
+		parent::getById($id);
+		
+		$this->setFilters(
+			array(
+				array(
+					'filter' => 'f.parent_id = :id',
+					'params' => array('id' => $id),
+				)
+			)
+		);
 	}
 	
 	public function getFileUploadForm(){
@@ -111,13 +153,23 @@ class FileList extends ListWidget
 			
 		if($request->getMethod() == 'GET'){
 			
-			$name = $request->get('name');	
+			$folder_name = $request->get('folder_name');	
+			$dir_id = $request->get('dir_id');	
 			
 			$file = new File();
 			
+			if($dir_id){
+				
+				$em = $this->getEntityManager();
+
+				$parent = $em->getReference('\BRS\FileBundle\Entity\File', $dir_id);
+				
+				$file->setParent($parent);
+			}
+			
 			$file->setIsDir(true);
 			
-			$file->setName($name);
+			$file->setName($folder_name);
 				
 			$em = $this->getDoctrine()->getEntityManager();
 			
@@ -125,7 +177,7 @@ class FileList extends ListWidget
 			
 			$em->flush();
 			
-			$values = array('name' => $name, 'id' => $file->getId(), 'is_dir' => true);
+			$values = array('name' => $folder_name, 'id' => $file->getId(), 'is_dir' => true);
 		}
 		
 		return $this->jsonResponse($values);

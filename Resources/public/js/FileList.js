@@ -16,6 +16,8 @@ var FileList = ListWidget.create({
 		
 		this.max_file_size = config.max_file_size;
 		
+		this.dir_id = config.dir_id;
+		
 		this.jqXHR = this.file_input.fileupload({
 			
 			dataType: 'json',
@@ -146,22 +148,52 @@ var FileList = ListWidget.create({
 		});
 
 		
+		$(this.container_name + ' .folder-link').live('click', function (event) {
+				
+			event.handled = true;
+								
+			var route = $(this).data('route');
+			
+			if(route){
+				
+				event.preventDefault();
+				
+				var nav_id = 'nav_' + route;
+				
+				if($(nav_id)){
+			
+					event.preventDefault();			
+					
+					//var nav_id = 'nav_' + route;
+		
+					//history.pushState({route: route}, "", this.href);
+									
+					//$j.nav.set_selected(nav_id);
+					
+					$j.nav.go(route, this.href);
+					
+					return false;
+				}
+			}
+		});
+		
 	},
 	
 	
 	
 	new_folder: function(target){
 		
+		var $this = this;
 		
 		var href = $(target).data('route');
 		
-		var data = {name: 'test1234'}
+		var folder_name = prompt("Enter the name of the new folder:","New Folder");
+		
+		var data = {folder_name: folder_name, dir_id: this.dir_id}
 		
 		this.call(href, data, function(data){
 			
-			alert(data.id);
-			
-			//$this.enable_reordering();
+			$this.refresh_data();
 		});
 		//alert('here');
 		

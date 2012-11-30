@@ -1,9 +1,26 @@
 {% extends 'BRSCoreBundle:Widget:list.html.twig' %}
+
+{% block widget_toolbar %}
+	
+	<ul class="breadcrumb">
+		<li><a href="{{ path('brs_file_fileadmin_index') }}" data-route="brs_file_fileadmin_index">{{ 'Root' | trans }}</a> <span class="divider">/</span></li>
+		
+		{% if entity_id %}
+			{% for folder in path %}
+				<li><a href="{{ path("brs_file_fileadmin_list", {id: folder.id}) }}" data-route="brs_file_fileadmin_list">{{ folder.name }}</a> <span class="divider">/</span></li>
+			{% endfor %}
+		{% endif %}
+		
+	</ul>
+	
+{% endblock %}
+		
 {% block pre_list_actions %}
 
-<span class="btn btn-small btn-success btn-file list-action" name="upload"><i class="icon-upload icon-white"></i> {{ 'Upload Files' | trans }}<input class="list-file-input" type="file" name="form[file]" data-url="{{ upload_url }}" multiple></span>
+<span class="btn btn-small btn-success btn-file list-action" name="upload"><i class="icon-upload-alt icon-white"></i> {{ 'Upload Files' | trans }}<input class="list-file-input" type="file" name="form[file]" data-url="{{ upload_url }}" multiple></span>
 <button class="btn btn-small list-action" name="new_folder" data-route="{{ path(route, { 'name':name, 'route':'new_folder' }) }}"><i class="icon-folder-open"></i> {{ 'New Folder' | trans }}</button>
 
+<input type="hidden" name="form[parent_id]" value="{{ entity_id }}"/>
 {{ form_widget(form._token) }}    
 
 {% endblock %}
@@ -19,6 +36,7 @@
 		pages: {{ pages }},
 		page_size: {{ page_size }},
 		max_file_size: {{ max_file_size }},
+		dir_id: '{{ entity_id }}'
 	});
 	
 </script>
