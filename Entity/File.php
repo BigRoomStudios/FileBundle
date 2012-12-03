@@ -257,8 +257,10 @@ class File extends SuperEntity
      */
     public function removeUpload()
     {
-        if ($file = $this->getAbsolutePath()) {
-            unlink($file);
+        if (!$this->is_dir && $file = $this->getAbsolutePath()) {
+            if(isfile($file)){
+            	unlink($file);
+			}
         }
     }
 

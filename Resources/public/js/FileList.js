@@ -147,16 +147,21 @@ var FileList = ListWidget.create({
 			}
 		});
 
+		$(this.container_name + ' .folder-link').die();
 		
 		$(this.container_name + ' .folder-link').live('click', function (event) {
 				
 			event.handled = true;
 								
-			var route = $(this).data('route');
+			var route = $(this).data('nav-route');
 			
 			if(route){
 				
+				//console.log('file nav click');
+				
 				event.preventDefault();
+				
+				event.stopPropagation();
 				
 				var nav_id = 'nav_' + route;
 				

@@ -153,15 +153,16 @@ class FileList extends ListWidget
 			
 		if($request->getMethod() == 'GET'){
 			
-			$folder_name = $request->get('folder_name');	
+			$folder_name = $request->get('folder_name');
+			
 			$dir_id = $request->get('dir_id');	
 			
 			$file = new File();
 			
+			$em = $this->getEntityManager();
+			
 			if($dir_id){
 				
-				$em = $this->getEntityManager();
-
 				$parent = $em->getReference('\BRS\FileBundle\Entity\File', $dir_id);
 				
 				$file->setParent($parent);
@@ -171,8 +172,6 @@ class FileList extends ListWidget
 			
 			$file->setName($folder_name);
 				
-			$em = $this->getDoctrine()->getEntityManager();
-			
 			$em->persist($file);
 			
 			$em->flush();
