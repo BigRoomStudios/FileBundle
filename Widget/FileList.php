@@ -36,12 +36,6 @@ class FileList extends ListWidget
 				'class' => 'btn btn-mini',
 			),
 			
-			'tree' => array(
-				'type' => 'file.tree',
-				'width' => 120,
-				'nonentity' => true,
-			),
-			
 			'thumb' => array(
 				'type' => 'thumbnail',
 				'width' => 40,
@@ -51,14 +45,6 @@ class FileList extends ListWidget
 			
 			'name' => array(
 				'type' => 'file.link',
-			),
-			
-			'type' => array(
-				'type' => 'text',
-			),
-			
-			'title' => array(
-				'type' => 'text',
 			),
 			
 			'is_dir' => array(
@@ -88,6 +74,9 @@ class FileList extends ListWidget
 		
 		$vars = array_merge(parent::getVars($render), $add_vars);
 		
+		
+		$path = null;
+		
 		if($vars['entity_id']){
 			
 			$em = $this->getEntityManager();
@@ -96,15 +85,16 @@ class FileList extends ListWidget
 			
 			$file = $em->getReference('\BRS\FileBundle\Entity\File', $vars['entity_id']);
 			
-			//$file = $file_repo->findOneById($vars['entity_id']);
-			
 			$path = $file_repo->getPath($file);
-			
-			$vars['path'] = $path;
-			
-			//BRS::die_pre(count($path));
-			
 		}
+		
+		$vars['path'] = $path;
+		
+		$vars['path_rendered'] = $this->container->get('templating')->render('BRSFileBundle:Widget:file.path.html.twig', array('path' => $path, 'entity_id' => $vars['entity_id'], 'ul_class' => 'breadcrumb'));
+		
+		//BRS::die_pre(count($path));
+			
+		
 		
 		return $vars;
 	}
@@ -147,6 +137,26 @@ class FileList extends ListWidget
 		return $this->jsonResponse($values);
 	}
 	
+	public function folderAction($dir_id)
+	{
+		if($dir_id){
+				
+			$this->getById($dir_id);
+			
+		}else{
+			
+			$this->setFilters(
+				array(
+					array(
+						'filter' => 'f.parent_id is null'
+					)
+				)
+			);
+		}
+		
+		return $this->rowsAction();
+	}
+	
 	public function newFolderAction()
 	{
 		$request = $this->getRequest();	
@@ -155,7 +165,7 @@ class FileList extends ListWidget
 			
 			$folder_name = $request->get('folder_name');
 			
-			$dir_id = $request->get('dir_id');	
+			$dir_id = $request->get('dir_id');
 			
 			$file = new File();
 			

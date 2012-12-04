@@ -152,36 +152,44 @@ var FileList = ListWidget.create({
 		$(this.container_name + ' .folder-link').live('click', function (event) {
 				
 			event.handled = true;
-								
+			
+			event.preventDefault();
+			
+			event.stopPropagation();
+							
 			var route = $(this).data('nav-route');
 			
-			if(route){
-				
-				//console.log('file nav click');
-				
-				event.preventDefault();
-				
-				event.stopPropagation();
-				
-				var nav_id = 'nav_' + route;
-				
-				if($(nav_id)){
+			var dir_id = $(this).data('dir-id');
 			
-					event.preventDefault();			
-					
-					//var nav_id = 'nav_' + route;
+			var nav_id = 'nav_' + route;
+			
+			$this.dir_id = dir_id;
+			
+			if($(nav_id)){
 		
-					//history.pushState({route: route}, "", this.href);
-									
-					//$j.nav.set_selected(nav_id);
-					
-					$j.nav.go(route, this.href);
-					
-					return false;
-				}
+				
 			}
+			
+			var upload_form_input = $this.container.find('input[name="form[parent_id]"]');
+			
+			upload_form_input.attr('value', dir_id);
+			
+			var action = $this.action + '/folder/' + dir_id + '?' + $this.widget_name + '[page]=1';
+
+			$this.load(action, true, function(response){
+			
+				var breadcrumb = $this.container.find('ul.breadcrumb');
+				
+				breadcrumb.replaceWith(response.path_rendered);
+				
+			});
+			
+			$this.set_selected_page(1);
+			
+			$this.jump_to_page(1);
+
+			return false;
 		});
-		
 	},
 	
 	
@@ -194,19 +202,15 @@ var FileList = ListWidget.create({
 		
 		var folder_name = prompt("Enter the name of the new folder:","New Folder");
 		
-		var data = {folder_name: folder_name, dir_id: this.dir_id}
+		if(folder_name){
 		
-		this.call(href, data, function(data){
+			var data = {folder_name: folder_name, dir_id: this.dir_id}
 			
-			$this.refresh_data();
-		});
-		//alert('here');
-		
-		//$(target).click();
-		
-		/*this.file_input.attr('value', '');
-		
-		this.file_input.click();*/
+			this.call(href, data, function(data){
+				
+				$this.refresh_data();
+			});
+		}
 	}
 	
 	

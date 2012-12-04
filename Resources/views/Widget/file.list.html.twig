@@ -2,16 +2,7 @@
 
 {% block widget_toolbar %}
 	
-	<ul class="breadcrumb">
-		<li><a class="folder-link" href="{{ path('brs_file_fileadmin_index') }}" data-nav-route="brs_file_fileadmin_index">{{ 'Root' | trans }}</a> <span class="divider">/</span></li>
-		
-		{% if entity_id %}
-			{% for folder in path %}
-				<li><a class="folder-link" href="{{ path("brs_file_fileadmin_list", {id: folder.id}) }}" data-nav-route="brs_file_fileadmin_list">{{ folder.name }}</a> <span class="divider">/</span></li>
-			{% endfor %}
-		{% endif %}
-		
-	</ul>
+	{% include 'BRSFileBundle:Widget:file.path.html.twig' with {ul_class:'breadcrumb'} %}
 	
 {% endblock %}
 		
