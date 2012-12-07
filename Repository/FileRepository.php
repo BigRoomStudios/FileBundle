@@ -15,6 +15,23 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class FileRepository extends NestedTreeRepository
 {
+		
+	public function getRootByName($name)
+	{
+		$files = $this->getEntityManager()
+			->createQuery("SELECT f FROM BRSFileBundle:File f WHERE f.name = :name AND f.tree_level = 0")
+			->setParameter('name', $name)
+			->setMaxResults(1)
+			->getResult();
+		
+		
+		//Utility::die_pre($files);
+		
+		if($files){
+			
+			return $files[0];
+		}
+	}	
 	
 	public function hanldeUploadRequest(\Symfony\Component\HttpFoundation\Request $request, $form){
 		

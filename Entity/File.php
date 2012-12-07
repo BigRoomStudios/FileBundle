@@ -95,6 +95,7 @@ class File extends SuperEntity
      * @var datetime $created_time
      *
      * @ORM\Column(name="created_time", type="datetime", nullable=true)
+	 * @Gedmo\Timestampable(on="create")
      */
     public $created_time;
 
@@ -102,6 +103,7 @@ class File extends SuperEntity
      * @var datetime $modified_time
      *
      * @ORM\Column(name="modified_time", type="datetime", nullable=true)
+	 * @Gedmo\Timestampable(on="update")
      */
     public $modified_time;
 
@@ -164,12 +166,18 @@ class File extends SuperEntity
      * @ORM\Column(name="root", type="integer", nullable=true)
      */
     public $root;
-
+  
     /**
-     * @Gedmo\TreeParent
-     * @ORM\ManyToOne(targetEntity="File", inversedBy="children")
-     * @ORM\JoinColumn(name="parent_id", referencedColumnName="id", onDelete="CASCADE")
-     */
+	 * @Gedmo\TreeParent
+	 * @ORM\ManyToOne(targetEntity="File", inversedBy="children")
+	 * @ORM\JoinColumns({
+	 *   @ORM\JoinColumn(name="parent_id", referencedColumnName="id", onDelete="SET NULL")
+	 * })
+	 * 
+	 * I think onDelete="SET NULL" fixes problems with removing tree nodes and their children
+	 * I had onDelete="DELETE" and that did not seem to work right
+	 * 
+	 */
     public $parent;
 
     /**
@@ -187,6 +195,8 @@ class File extends SuperEntity
      */
     public $file;
 	
+	
+	public $is_tree = true;
 	
 	
 	public function __construct()
