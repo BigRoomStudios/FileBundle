@@ -31,7 +31,37 @@ class FileRepository extends NestedTreeRepository
 			
 			return $files[0];
 		}
-	}	
+	}
+	
+	public function searchInDir($dir, $query, $order = null)
+	{
+		
+		$query_builder = $this->getEntityManager()
+			->createQueryBuilder()
+			->select('f')
+			->from('BRSFileBundle:File', 'f')
+			->where('f.tree_left > :tree_left AND f.tree_right < :tree_right AND f.is_dir is null')
+			->setParameter('tree_left', $dir->tree_left)
+			->setParameter('tree_right', $dir->tree_right);
+		
+		if($order){
+			
+			$query_builder->orderBy('f.' . $order);
+		}
+			
+		
+		$query_pieces = explode(' ', $query);
+			
+		foreach($query_pieces as $i => $q){
+			
+			$query_builder->andWhere('f.name LIKE :name' . $i)->setParameter('name'. $i, '%' . $q . '%');
+		}
+			
+		$files = $query_builder->getQuery()->getResult();
+		
+		return $files;
+	}
+	
 	
 	public function hanldeUploadRequest(\Symfony\Component\HttpFoundation\Request $request, $form){
 		
