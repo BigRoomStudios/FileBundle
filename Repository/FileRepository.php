@@ -40,7 +40,7 @@ class FileRepository extends NestedTreeRepository
 			->createQueryBuilder()
 			->select('f')
 			->from('BRSFileBundle:File', 'f')
-			->where('f.tree_left > :tree_left AND f.tree_right < :tree_right AND f.is_dir is null')
+			->where('f.tree_left > :tree_left AND f.tree_right < :tree_right')
 			->setParameter('tree_left', $dir->tree_left)
 			->setParameter('tree_right', $dir->tree_right);
 		
