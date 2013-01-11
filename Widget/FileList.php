@@ -66,8 +66,14 @@ class FileList extends ListWidget
 		//$upload_url = $this->generateUrl('brs_file_file_upload');
 		$upload_url = $this->getActionUrl('upload');
 		
+		$rendered = null;
+		
+		if($render){
+			$rendered = $form->createView();
+		}
+		
 		$add_vars = array(
-			'form' => $form->createView(),
+			'form' => $rendered,
 			'max_file_size' => (int)ini_get('upload_max_filesize') * 1024 * 1024,
 			'upload_url' => $upload_url,
 		);
