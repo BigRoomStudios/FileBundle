@@ -34,13 +34,47 @@ class FileAdminController extends AdminController
 	
 		$edit_fields = array(
 			
-			'name' => array(
-				'type' => 'text',
-				'required' => false,
+			array(
+			
+				'type' => 'group',
+				'fields' => array(
+			
+					'name' => array(
+						'type' => 'text',
+						'required' => false,
+						'attr' => array(
+							'class' => 'extra-large'
+						)
+					),
+				),
 			),
 			
-			'title' => array(
-				'type' => 'text',
+			array(
+			
+				'type' => 'group',
+				'fields' => array(
+			
+					'title' => array(
+						'type' => 'text',
+						'attr' => array(
+							'class' => 'extra-large'
+						)
+					),
+				),
+			),
+			
+			array(
+			
+				'type' => 'group',
+				'fields' => array(
+			
+					'description' => array(
+						'type' => 'textarea',
+						'attr' => array(
+							'class' => 'extra-large'
+						)
+					),
+				),
 			),
 		);
 		

@@ -4,7 +4,7 @@
 	
 		{% for item in files %}
 		
-			<li><img class="{{ img_class | default('file-thumbnail') }}" src="{{ path( 'brs_file_file_image', {'id':item.file_id, 'width':image_width|default(50), 'height':image_height|default(50), params:image_params|default('quality:75/crop/') }) }}" /></li>
+			<li><img class="{{ img_class | default('file-thumbnail') }}" src="{{ path( 'brs_file_file_image', {'id':item.id, 'width':image_width|default(50), 'height':image_height|default(50), params:image_params|default('quality:75/crop/') }) }}" /></li>
 			
 		{% endfor %}
 	

@@ -19,7 +19,7 @@ abstract class AttachedFileEntity extends SuperEntity
 	/*
 	 * name of root folder that holds all entity sub-folders
 	 */
-    private $root_folder_name;
+    private $root_folder_name = 'you must create a folder in root and assign this variable';
 	
 	/**
      * @var integer $dir_id
