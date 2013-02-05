@@ -74,6 +74,8 @@ class FileRepository extends NestedTreeRepository
 			
 			$form_post = $request->get('form');
 			
+			$parent_folder = $request->get('parent_folder');
+			
 			$params = array('form' => array('_token' => $form_post['_token']));
 			
 			$new_request = Request::create($request->getUri(), 'POST', $params, $_COOKIE, $_FILES, $_SERVER, $request->getContent());
@@ -86,8 +88,20 @@ class FileRepository extends NestedTreeRepository
 				$file = $form->getData();
 				
 				$em = $this->getEntityManager();
-	
-				$parent_id = $form_post['parent_id'];
+				
+				$parent_id = null;
+				
+				if(isset($form_post['parent_id'])){
+				
+					$parent_id = $form_post['parent_id'];
+				}
+				
+				if($parent_folder){
+						
+					$parent = $this->getRootByName($parent_folder);			
+					
+					$parent_id = $parent->id;
+				}
 				
 				if($parent_id){
 					
@@ -95,6 +109,7 @@ class FileRepository extends NestedTreeRepository
 				
 					$file->setParent($parent);
 				}
+				
 				
 				$em->persist($file);
 				

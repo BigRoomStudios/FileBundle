@@ -4,7 +4,7 @@ var FileUploadWidget = Class.create({
 		
 		var $this = this;
 		
-		this.container = $('#' + config.container);
+		this.container = $(config.container);
 		
 		this.file_input = this.container.find('input.file-input');
 		
@@ -14,11 +14,20 @@ var FileUploadWidget = Class.create({
 		
 		this.file_id_field = this.container.find('input[name="form[file_id]"]');
 		
+		if(config.image_container){
+		
+			this.image_container = $(config.image_container);
+		}
+		
 		this.files = new Array();
 		
 		this.started = 0;
 		
 		this.max_file_size = config.max_file_size;
+		
+		this.parent_id = config.parent_id;
+		
+		this.progress = this.container.find('.progress');
 		
 		this.jqXHR = this.file_input.fileupload({
 			
@@ -39,17 +48,28 @@ var FileUploadWidget = Class.create({
 					
 					$this.container.find('.progress .bar').width('100%');
 					
-					$this.container.find('.progress').addClass('progress-success');
+					var $progress = 
 					
-					$this.container.find('.progress').removeClass('active');
+					$this.progress.addClass('progress-success');
+					
+					$this.progress.removeClass('active');
+					
+					$this.progress.hide();
 					
 					var file_id = data.result.file.id;
+					
+					if($this.image_container){
+						
+						$this.image_container.html('<img src="/image/' + file_id + '/200/200/quality:75"/>');
+					}
 					
 					//alert(file_id);
 					
 					$this.file_id_field.attr('value', file_id);
 					
-					//$this.container.find('.close').remove();
+					$this.container.find('.close').remove();
+					
+					$this.upload_button.show();
 				}
 			},
 			
@@ -70,7 +90,7 @@ var FileUploadWidget = Class.create({
 					$this.started ++;
 					
 					$this.upload_button.hide();
-					$this.container.find('.progress').show();
+					$this.progress.show();
 					$this.container.find('.close').show();
 					
 					data.url = $this.file_input.data('url');
@@ -78,7 +98,7 @@ var FileUploadWidget = Class.create({
 					var jqXHR = data.submit()
 						.success(function (result, textStatus, jqXHR) {
 							
-							
+							//alert('success');
 						})
 						.error(function (jqXHR, textStatus, errorThrown) {
 							

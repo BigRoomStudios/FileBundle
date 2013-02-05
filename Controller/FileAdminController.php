@@ -68,6 +68,20 @@ class FileAdminController extends AdminController
 				'type' => 'group',
 				'fields' => array(
 			
+					'url' => array(
+						'type' => 'text',
+						'attr' => array(
+							'class' => 'extra-large'
+						)
+					),
+				),
+			),
+			
+			array(
+			
+				'type' => 'group',
+				'fields' => array(
+			
 					'description' => array(
 						'type' => 'textarea',
 						'attr' => array(
