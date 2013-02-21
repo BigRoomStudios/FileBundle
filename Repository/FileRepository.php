@@ -27,7 +27,7 @@ class FileRepository extends NestedTreeRepository
 		if(isset($files[0]) && $files[0] !== null)
 			$file = $files[0];
 		
-		elseif ($create === TRUE) {
+		else {
 			$file = new File();
 			$file->setName($name);
 			$file->setIsDir(true);
