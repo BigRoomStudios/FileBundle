@@ -16,7 +16,7 @@ use Symfony\Component\HttpFoundation\Request;
 class FileRepository extends NestedTreeRepository
 {
 		
-	public function getRootByName($name)
+	public function getRootByName($name, $create = FALSE)
 	{
 		$files = $this->getEntityManager()
 			->createQuery("SELECT f FROM BRSFileBundle:File f WHERE f.name = :name AND f.tree_level = 0")
@@ -24,13 +24,20 @@ class FileRepository extends NestedTreeRepository
 			->setMaxResults(1)
 			->getResult();
 		
+		if(isset($files[0]) && $files[0] !== null)
+			$file = $files[0];
 		
-		//Utility::die_pre($files);
-		
-		if($files){
+		elseif ($create === TRUE) {
+			$file = new File();
+			$file->setName($name);
+			$file->setIsDir(true);
 			
-			return $files[0];
+			$em = $this->getEntityManager();
+			$em->persist($file);
+			$em->flush();
 		}
+		
+		return $file;
 	}
 	
 	public function searchInDir($dir, $query, $order = null)
