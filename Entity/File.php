@@ -34,6 +34,13 @@ class File extends SuperEntity
      * @ORM\Column(name="name", type="string", length=255, nullable=true)
      */
     public $name;
+    
+    /**
+     * @var string $class_root
+     *
+     * @ORM\Column(name="class_root", type="string", length=255, nullable=true, unique = true)
+     */
+    public $class_root;
 
     /**
      * @var string $ext
@@ -169,7 +176,7 @@ class File extends SuperEntity
   
     /**
 	 * @Gedmo\TreeParent
-	 * @ORM\ManyToOne(targetEntity="File", inversedBy="children")
+	 * @ORM\ManyToOne(targetEntity="File", inversedBy="children", cascade={"persist"})
 	 * @ORM\JoinColumns({
 	 *   @ORM\JoinColumn(name="parent_id", referencedColumnName="id", onDelete="SET NULL")
 	 * })
@@ -404,6 +411,60 @@ class File extends SuperEntity
 			return $cache_path;
 		}
     }
+
+    /**
+     * Set class_root
+     * 
+     * Can only be done on a root node that is NEW.
+     * 
+     * @param Object
+     */
+    public function setClassRoot($object = null)
+    {
+    	if (empty($object) || !is_object($object))
+    		throw new \Exception('$page->setClassRoot($param1) expects parameter 1 to be an object, '.gettype($object).' given.');
+    	elseif (!empty($this->id))
+    		throw new \Exception('$page->setClassRoot($param1) can only be called on a new Entity.  Tried to call on entity: '.$this->id);
+    	
+    	$class = get_class($object);
+    	
+    	$class_title = substr($class, strrpos($class, "\\")+1);
+    	
+    	switch (substr($class_title,-1)){
+    		case 'y':
+    			$class_title = substr($class_title,0,-1).'ies';
+    			break;
+    		case 'h':
+    		case 's':
+    			$class_title .= 'es';
+    			break;
+    		default:
+    			$class_title .= 's';
+    			break;
+    	}
+    	
+    	$this->name = ucfirst($class_title).' Root';
+    	$this->class_root = $class;
+    	
+    	return $this;
+    }
+    
+    /**
+     * Set class_root
+     *
+     * Can only be done on a root node that is NEW.
+     *
+     * @param Object
+     */
+    public function isClassRoot($object = null)
+    {
+    	if (empty($object) || !is_object($object))
+    		throw new \Exception('$page->setClassRoot($param1) expects parameter 1 to be an object, '.gettype($object).' given.');
+    	
+    	if (get_class($object) == $this->class_root)
+    		return true;
+    	return false;
+    }
 	
 	
 	
@@ -427,6 +488,8 @@ class File extends SuperEntity
     public function setName($name)
     {
         $this->name = $name;
+        
+        return $this;
     }
 
     /**
@@ -447,6 +510,8 @@ class File extends SuperEntity
     public function setExt($ext)
     {
         $this->ext = $ext;
+        
+        return $this;
     }
 
     /**
@@ -467,6 +532,8 @@ class File extends SuperEntity
     public function setSize($size)
     {
         $this->size = $size;
+        
+        return $this;
     }
 
     /**
@@ -487,6 +554,8 @@ class File extends SuperEntity
     public function setType($type)
     {
         $this->type = $type;
+        
+        return $this;
     }
 
     /**
@@ -507,6 +576,8 @@ class File extends SuperEntity
     public function setWidth($width)
     {
         $this->width = $width;
+        
+        return $this;
     }
 
     /**
@@ -527,6 +598,8 @@ class File extends SuperEntity
     public function setHeight($height)
     {
         $this->height = $height;
+        
+        return $this;
     }
 
     /**
@@ -547,6 +620,8 @@ class File extends SuperEntity
     public function setTitle($title)
     {
         $this->title = $title;
+        
+        return $this;
     }
 
     /**
@@ -567,6 +642,8 @@ class File extends SuperEntity
     public function setDescription($description)
     {
         $this->description = $description;
+        
+        return $this;
     }
 
     /**
@@ -587,6 +664,8 @@ class File extends SuperEntity
     public function setUrl($url)
     {
         $this->url = $url;
+        
+        return $this;
     }
 
     /**
@@ -607,6 +686,8 @@ class File extends SuperEntity
     public function setCreatedTime($createdTime)
     {
         $this->created_time = $createdTime;
+        
+        return $this;
     }
 
     /**
@@ -627,6 +708,8 @@ class File extends SuperEntity
     public function setModifiedTime($modifiedTime)
     {
         $this->modified_time = $modifiedTime;
+        
+        return $this;
     }
 
     /**
@@ -647,6 +730,8 @@ class File extends SuperEntity
     public function setPermissions($permissions)
     {
         $this->permissions = $permissions;
+        
+        return $this;
     }
 
     /**
@@ -667,6 +752,8 @@ class File extends SuperEntity
     public function setOwnerId($ownerId)
     {
         $this->owner_id = $ownerId;
+        
+        return $this;
     }
 
     /**
@@ -687,6 +774,8 @@ class File extends SuperEntity
     public function setGroupId($groupId)
     {
         $this->group_id = $groupId;
+        
+        return $this;
     }
 
     /**
@@ -707,6 +796,8 @@ class File extends SuperEntity
     public function setIsDir($is_dir)
     {
         $this->is_dir = $is_dir;
+        
+        return $this;
     }
 
     /**
@@ -727,6 +818,9 @@ class File extends SuperEntity
     public function setParent(\BRS\FileBundle\Entity\File $parent)
     {
         $this->parent = $parent;
+        $this->parent_id = $parent->getId();
+        
+        return $this;
     }
 
     /**
@@ -747,6 +841,8 @@ class File extends SuperEntity
     public function addFile(\BRS\FileBundle\Entity\File $children)
     {
         $this->children[] = $children;
+        
+        return $this;
     }
 
     /**
@@ -767,6 +863,8 @@ class File extends SuperEntity
     public function setParentId($parentId)
     {
         $this->parent_id = $parentId;
+        
+        return $this;
     }
 
     /**

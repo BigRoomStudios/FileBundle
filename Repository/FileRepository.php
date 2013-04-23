@@ -15,7 +15,29 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class FileRepository extends NestedTreeRepository
 {
+	
+	public function getRootFor($object, $create = FALSE)
+	{
+		if(!is_object($object)) return false;
 		
+		$node = new File();
+		
+		$class = get_class($object);
+		$em = $this->getEntityManager();
+		
+		$nodes = $em->createQuery("SELECT n FROM BRSFileBundle:File n WHERE n.class_root = :class_root")
+			->setParameter('class_root', $class)
+			->setMaxResults(1)
+			->getResult();
+		
+		if(isset($nodes[0]) && $nodes[0] !== null)
+			return $nodes[0];
+		else if ($create === TRUE)
+			return $node->setClassRoot($object)->setIsDir(TRUE);
+		else
+			return false;
+	}
+	
 	public function getRootByName($name, $create = FALSE)
 	{
 		$files = $this->getEntityManager()
@@ -34,7 +56,6 @@ class FileRepository extends NestedTreeRepository
 			
 			$em = $this->getEntityManager();
 			$em->persist($file);
-			$em->flush();
 		}
 		
 		return $file;
