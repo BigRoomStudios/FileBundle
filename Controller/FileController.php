@@ -69,7 +69,6 @@ class FileController extends WidgetController
 		}
 	}
 	
-
 	/**
 	 * handle a file display request
 	 *
@@ -90,6 +89,73 @@ class FileController extends WidgetController
 			
 			$this->fileNotFound();
 		}
+	}
+	
+	/**
+	 * handle a file display request
+	 *
+	 * @Route("/file/delete/{id}", requirements={"id" = "\d+"}, name="brs_file_delete")
+	 * 
+	 */
+	public function deleteAction($id)
+	{
+		
+		$file = $this->getRepository('BRSFileBundle:File')->findOneById($id);
+		
+		if(is_object($file)){
+			
+			//get the owner of the file
+			$owner_id = $file->getOwnerId();
+			
+			if($owner_id) {
+				
+				//get the user id
+				$user_id = $this->getUser()->getId();
+				
+				//if they don't match
+				if($user_id != $owner_id) {
+					
+					//fuck no you can't delete this!
+					$response = array(
+						'success' => false,
+						'message' => "You do not have permission to delete this!",
+					);
+					
+					$response = new Response(json_encode($response));
+					$response->headers->set('Content-Type', 'application/json');
+					
+					return $response;
+					
+				}
+				
+			}
+			
+			$em = $this->getDoctrine()->getManager();
+			
+			$em->remove($file);
+			$em->flush();
+			
+			//generate an error message
+			$response = array(
+				'success' => true,
+			);
+			
+		}
+		else{
+			
+			//generate an error message
+			$response = array(
+				'success' => false,
+				'message' => "Could not find record",
+			);
+			
+		}
+		
+		$response = new Response(json_encode($response));
+		$response->headers->set('Content-Type', 'application/json');
+		
+		return $response;
+		
 	}
 
 
