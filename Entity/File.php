@@ -368,7 +368,7 @@ class File extends SuperEntity
 		
 		$cache_path = $this->getResizedCachePath($width, $height, $params);
 		
-		if(!file_exists($cache_path)){
+		if(!file_exists($cache_path) && $this->getWidth()){
 			
 			$image = new \Imagick($real_path);
 			
@@ -532,7 +532,19 @@ class File extends SuperEntity
     {
         return $this->ext;
     }
-
+	
+	public function isImage() {
+		
+		$ext = $this->getExt();
+		
+		if($this->getWidth()) {
+			return true;
+		}
+		
+		return false;
+		
+	}
+	
     /**
      * Set size
      *
