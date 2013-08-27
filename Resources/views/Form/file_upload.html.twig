@@ -1,0 +1,127 @@
+{% block upload_files %}
+
+	{% block upload_container_start %}<div id="{{ name }}" class="file_upload" data-upload-url="{{ path('file_upload', {'directory': directory_id}) }}">{% endblock upload_container_start %}
+		
+		{% block header %}
+			<div class="upload_header">
+				{% block upload_title %}<h2 class="upload_title">Directory List</h2>{% endblock upload_title %}
+				{% block add_file %}<div class="add_file">Add File</div>{% endblock add_file %}
+			</div>
+		{% endblock header %}
+		
+		{% block errors %}<div class="errors"></div>{% endblock errors %}
+		
+		{% block file_list %}
+			
+			<div class="file_list grid">
+				
+				{% for file in files %}
+					
+					{% block file %}
+						
+						<div class="file grid-item one_fourth"  data-file-id="{{ file.id }}" data-delete-link="{{ path('brs_file_delete', {'id':file.id}) }}">
+							
+							<div class="file_thumbnail" {% if file.width %}style="background-image:url('{{ path( 'brs_file_file_image', {'id':file.id, 'width':file.width, 'height':file.height, params:'quality:75/crop/' }) }}{{ file.name }}');"{% endif %}></div>
+							
+							<div class="file_name">{{ file.name }}</div>
+							
+						</div>
+						
+					{% endblock file %}
+					
+				{% endfor %}
+				
+			</div>
+			
+		{% endblock file_list %}
+		
+	{% block upload_container_end %}</div>{% endblock upload_container_end %}
+	
+	{#
+	
+	<div id="{{ name }}" class="property-block photos file_upload" data-upload-url="{{ path('property_upload_image', {'property': _c.property.getId(), 'directory_id': this_block.directory_id}) }}">
+    	
+        <div class="static">
+            <h1>{{ this_block.display_name }}</h1>
+        </div>
+        
+        <div id="photos-error"></div>
+        
+		<div class="grid photos-layout" class="grid">
+			
+			<div class="grid-item desk-one_half one_whole">
+			    <div class="grid photos-primary">
+				<div class="grid-item one_whole">
+					    <div class="image {% if this_block.images.0 %}image-active{% else %}image-next{% endif %}" style="background-image:url('{% if this_block.images.0 %}{{ path( 'brs_file_file_image', {'id':this_block.images.0.id, 'width':this_block.images.0.width, 'height':this_block.images.0.height, params:'quality:75/crop/' }) }}{{ this_block.images.0.name }}{% endif %}');" data-image-id="{{ this_block.images.0.id }}" data-delete-link="{{ path('brs_file_delete', {'id':this_block.images.0.id}) }}">
+					    <span class="icon-plus-camera">
+						    <span class="icon-plus">+</span>
+						    <span class="icon-camera"></span>
+					    </span>
+					    <span class="remove">×</span>
+					    <span class="caption">{{ this_block.images.0.title }}</span>
+					</div>
+				</div>
+			    </div>
+			</div
+			
+			><div class="grid-item desk-one_half one_whole">
+				
+			    <div class="grid photos-secondary">
+				
+					<div class="grid-item desk-one_half one_fourth">
+						<div class="image {% if this_block.images.1 %}image-active{% elseif this_block.images.0 %}image-next{% else %}image-empty{% endif %}" {% if this_block.images.1 %}style="background-image:url('{{ path( 'brs_file_file_image', {'id':this_block.images.1.id, 'width':this_block.images.1.width, 'height':this_block.images.1.height, params:'quality:75/crop/' }) }}{{ this_block.images.1.name }}');"{% endif %} data-image-id="{{ this_block.images.1.id }}" data-delete-link="{{ path('brs_file_delete', {'id':this_block.images.1.id}) }}">
+						    <span class="icon-plus-camera">
+								<span class="icon-plus">+</span>
+								<span class="icon-camera"></span>
+						    </span>
+						    <span class="remove">×</span>
+						    <span class="caption">{{ this_block.images.1.title }}</span>
+						</div>
+					</div
+					
+					><div class="grid-item desk-one_half one_fourth">
+						<div class="image {% if this_block.images.2 %}image-active{% elseif this_block.images.1 %}image-next{% else %}image-empty{% endif %}" {% if this_block.images.2 %}style="background-image:url('{{ path( 'brs_file_file_image', {'id':this_block.images.2.id, 'width':this_block.images.2.width, 'height':this_block.images.2.height, params:'quality:75/crop/' }) }}{{ this_block.images.2.name }}');"{% endif %} data-image-id="{{ this_block.images.2.id }}" data-delete-link="{{ path('brs_file_delete', {'id':this_block.images.2.id}) }}">
+						    <span class="icon-plus-camera">
+								<span class="icon-plus">+</span>
+								<span class="icon-camera"></span>
+						    </span>
+						    <span class="remove">×</span>
+						    <span class="caption">{{ this_block.images.2.title }}</span>
+						</div>
+					</div
+					
+					><div class="grid-item desk-one_half one_fourth">
+						<div class="image {% if this_block.images.3 %}image-active{% elseif this_block.images.2 %}image-next{% else %}image-empty{% endif %}" {% if this_block.images.3 %}style="background-image:url('{{ path( 'brs_file_file_image', {'id':this_block.images.3.id, 'width':this_block.images.3.width, 'height':this_block.images.3.height, params:'quality:75/crop/' }) }}{{ this_block.images.3.name }}');"{% endif %} data-image-id="{{ this_block.images.3.id }}" data-delete-link="{{ path('brs_file_delete', {'id':this_block.images.3.id}) }}">
+						    <span class="icon-plus-camera">
+								<span class="icon-plus">+</span>
+								<span class="icon-camera"></span>
+						    </span>
+						    <span class="remove">×</span>
+						    <span class="caption">{{ this_block.images.3.title }}</span>
+						</div>
+					</div
+					
+					><div class="grid-item desk-one_half one_fourth">
+						<div class="image {% if this_block.images.4 %}image-active{% elseif this_block.images.3 %}image-next{% else %}image-empty{% endif %}" {% if this_block.images.4 %}style="background-image:url('{{ path( 'brs_file_file_image', {'id':this_block.images.4.id, 'width':this_block.images.4.width, 'height':this_block.images.4.height, params:'quality:75/crop/' }) }}{{ this_block.images.4.name }}');"{% endif %} data-image-id="{{ this_block.images.4.id }}" data-delete-link="{{ path('brs_file_delete', {'id':this_block.images.4.id}) }}">
+						    <span class="icon-plus-camera">
+								<span class="icon-plus">+</span>
+								<span class="icon-camera"></span>
+						    </span>
+						    <span class="remove">×</span>
+						    <span class="caption">{{ this_block.images.4.title }}</span>
+						</div>
+					</div>
+					
+			    </div>
+			    
+			</div>
+            
+		</div>
+		
+		<input id="imageupload" type="file" name="form[file]" data-url="{{ path('property_upload_image', {'property': _c.property.getId(), 'directory_id': this_block.directory_id}) }}" multiple style="display:none;">
+		
+    </div>
+	
+	#}
+	
+{% endblock upload_files %}

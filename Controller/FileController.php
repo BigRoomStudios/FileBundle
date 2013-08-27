@@ -42,11 +42,34 @@ class FileController extends WidgetController
 		return $this->jsonResponse($values);
 	}
 	
+	/**
+	 * handle a file upload post
+	 *
+	 * @Route("/file/upload/{directory}", name="file_upload")
+	 * 
+	 */
+	public function fileUploadAction(File $directory) {
+		
+		$file = new File();
+		
+		$form = $this->createFormBuilder($file)
+			->add('file')
+			->getForm();
+		
+		$request = $this->getRequest();
+		
+		$file_repo = $this->getRepository('BRSFileBundle:File');
+		
+		$values = $file_repo->hanldeUploadRequest($request, $form);
+	
+		return $this->jsonResponse($values);
+	}
+	
 	
 	/**
 	 * handle a file download 
 	 *
-	 * @Route("/file/download/{id}", requirements={"id" = "\d+"})
+	 * @Route("/file/download/{id}", requirements={"id" = "\d+"}, name="brs_file_download")
 	 * 
 	 */
 	public function downloadAction($id)
@@ -214,7 +237,7 @@ class FileController extends WidgetController
 	
 	protected function fileNotFound(){
 		
-		throw $this->createNotFoundException('This is not the file you\'re looking for...');
+		throw $this->createNotFoundException("This is not the file you're looking for...");
 	}
 	
 	protected function sendFile($path, $type, $name){

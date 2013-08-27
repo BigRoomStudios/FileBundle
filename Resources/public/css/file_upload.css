@@ -1,0 +1,41 @@
+.file_upload{
+	width:80%;
+	margin:0 auto;
+}
+
+.upload_header{
+	position:relative;
+}
+
+.add_file{
+	position:absolute;
+	bottom:0;
+	right:0;
+}
+
+.errors{
+	color:red;
+}
+
+.upload_listener{
+	border:1px solid green;
+}
+
+.file_list{
+	border:1px solid blue;
+}
+
+.file{
+	border:1px solid 
+}
+
+.file_thumbnail{
+	width:100px;
+	height:100px;
+	background-position:50% 50%;
+	background-size:cover;
+}
+
+.file_name{
+	
+}
