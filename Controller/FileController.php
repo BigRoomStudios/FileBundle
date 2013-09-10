@@ -52,7 +52,7 @@ class FileController extends WidgetController
 		
 		$file = new File();
 		
-		$form = $this->createFormBuilder($file)
+		$form = $this->createFormBuilder($file, array('csrf_protection' => false))
 			->add('file')
 			->getForm();
 		
@@ -60,8 +60,25 @@ class FileController extends WidgetController
 		
 		$file_repo = $this->getRepository('BRSFileBundle:File');
 		
-		$values = $file_repo->hanldeUploadRequest($request, $form);
-	
+		$values = $file_repo->hanldeUploadRequest($request, $form, $directory);
+		$file = $values['file'];
+		
+		if ($file->isImage()) {
+			$url = $this->generateUrl('brs_file_file_image', array(
+				'id' => $file->getId(),
+				'width' => $file->getWidth(),
+				'height' => $file->getHeight(),
+				'params' => 'quality:75/crop/'
+			));
+		} else {
+			$url = null;
+		}
+		
+		$values['thumb_url']     = $url;
+		$values['delete_link']   = $this->generateUrl('brs_file_delete',   array('id' => $file->getId()));
+		$values['download_link'] = $this->generateUrl('brs_file_download', array('id' => $file->getId()));
+		$values['upload_date'] = $file->getCreatedTime()->format('M/d/Y');
+		
 		return $this->jsonResponse($values);
 	}
 	

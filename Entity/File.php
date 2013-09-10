@@ -244,7 +244,7 @@ class File extends SuperEntity
     public function preUpload()
     {
         if (null !== $this->file) {
-        	
+            
             $this->ext = $this->file->guessExtension();
 			$this->name = $this->file->getClientOriginalName();
 			$this->type = $this->file->getMimeType();

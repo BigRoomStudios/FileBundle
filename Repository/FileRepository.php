@@ -91,7 +91,7 @@ class FileRepository extends NestedTreeRepository
 	}
 	
 	
-	public function hanldeUploadRequest(\Symfony\Component\HttpFoundation\Request $request, $form){
+	public function hanldeUploadRequest(\Symfony\Component\HttpFoundation\Request $request, $form, $directory = null){
 		
 		if ($request->getMethod() === 'POST') {
 			
@@ -104,48 +104,57 @@ class FileRepository extends NestedTreeRepository
 			
 			$parent_folder = $request->get('parent_folder');
 			
-			$params = array('form' => array('_token' => $form_post['_token']));
+			//$params = array('form' => array('_token' => $form_post['_token']));
+			$params = array('form' => array());
 			
 			$new_request = Request::create($request->getUri(), 'POST', $params, $_COOKIE, $_FILES, $_SERVER, $request->getContent());
 			
+			$files = $new_request->files->all();
+			$file = $files['file'];
 			
 			$form->bindRequest($new_request);
 			
-			if ($form->isValid()) {
+			if ($form->isValid() && $file) {
 				
-				$file = $form->getData();
+				$file_obj = $form->getData();
 				
 				$em = $this->getEntityManager();
 				
-				$parent_id = null;
+				$file_obj->file = $file;
 				
-				if(isset($form_post['parent_id'])){
-				
-					$parent_id = $form_post['parent_id'];
-				}
-				
-				if($parent_folder){
+				if ($directory) {
+					$file_obj->setParent($directory);
+				} else {
+					$parent_id = null;
+					
+					if(isset($form_post['parent_id'])){
 						
-					$parent = $this->getRootByName($parent_folder);			
+						$parent_id = $form_post['parent_id'];
+					}
 					
-					$parent_id = $parent->id;
+					if($parent_folder){
+							
+						$parent = $this->getRootByName($parent_folder);			
+						
+						$parent_id = $parent->id;
+					}
+					
+					if($parent_id){
+						
+						$parent = $em->getReference('\BRS\FileBundle\Entity\File', $parent_id);
+						
+						$file_obj->setParent($parent);
+					}
 				}
 				
-				if($parent_id){
-					
-					$parent = $em->getReference('\BRS\FileBundle\Entity\File', $parent_id);
 				
-					$file->setParent($parent);
-				}
-				
-				
-				$em->persist($file);
+				$em->persist($file_obj);
 				
 				$em->flush();
 	
 				$values = array(
 					'status' => 'success',
-					'file' => $file,
+					'file' => $file_obj,
 				);
 				
 				return $values;
