@@ -16,26 +16,50 @@ use Symfony\Component\HttpFoundation\Request;
 class FileRepository extends NestedTreeRepository
 {
 	
-	public function getRootFor($object, $create = FALSE)
-	{
-		if(!is_object($object)) return false;
+	/**
+	 * Get the root directory for a given object
+	 * 
+	 * @param object - the object to get a root directory for
+	 * @param create - optional flag to create the root directory if it doesn't exist
+	 * 
+	 * @return a file entity if one is found or if the create flag is true, false otherwise
+	 */
+	public function getRootFor($object, $create = FALSE) {
+		
+		//if the object parameter isn't an object return failure
+		if(!is_object($object))
+			return false;
 		
 		$node = new File();
 		
 		$class = get_class($object);
 		$em = $this->getEntityManager();
 		
+		//check if a root directory exists for this object
 		$nodes = $em->createQuery("SELECT n FROM BRSFileBundle:File n WHERE n.class_root = :class_root")
 			->setParameter('class_root', $class)
 			->setMaxResults(1)
 			->getResult();
 		
-		if(isset($nodes[0]) && $nodes[0] !== null)
+		if(isset($nodes[0]) && $nodes[0] !== null) {
+			
+			//return the record if it was found
 			return $nodes[0];
-		else if ($create === TRUE)
+			
+		}
+		else if ($create === TRUE) {
+			
+			//return the new record
 			return $node->setClassRoot($object)->setIsDir(TRUE);
-		else
+			
+		}
+		else {
+			
+			//return failure
 			return false;
+			
+		}
+		
 	}
 	
 	public function getRootByName($name, $create = FALSE)
@@ -94,9 +118,6 @@ class FileRepository extends NestedTreeRepository
 	public function hanldeUploadRequest(\Symfony\Component\HttpFoundation\Request $request, $form, $directory = null){
 		
 		if ($request->getMethod() === 'POST') {
-			
-			
-			
 			
 			//strip everything but the csrf token from the request and just handle the file
 			
