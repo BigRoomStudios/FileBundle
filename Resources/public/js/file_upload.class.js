@@ -200,10 +200,12 @@ var FileUpload = Class.create({
 
 var docBlocks = [];
 var imgBlocks = [];
+var docCb = function(){};
+var imgCb = function(){};
 $(function() {
 	
 
-	$('.property-block.documents').each(function() {
+	$('.property-block.documents').each(docCb = function() {
 		
 		$(this).on('dragover', function(e) {
 				
@@ -242,9 +244,9 @@ $(function() {
 								'<div class="document_preview">' 			+
 									'<div class="document_thumb">'			+
 										'<span class="icon-document"></span>'	+
+										'<div class="remove icon-trash"></div>' +
 									'</div>' 					+
 									'<div class="document_ext">' 			+
-										'<div class="remove icon-trash"></div>' +
 										'<span></span>' 			+
 									'</div>' 					+ 
 								'</div>' 						+ 
@@ -295,7 +297,7 @@ $(function() {
 	});
 	
 	
-	$('.property-block.photos').each(function() {
+	$('.property-block.photos').each(imgCb = function() {
 		
 		$(this).on('dragover', function(e) {
 				
