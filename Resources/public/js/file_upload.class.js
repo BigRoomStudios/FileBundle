@@ -5,8 +5,8 @@ var FileUpload = Class.create({
 		this.maxFileSize 	= config.maxFileSize 			|| 0; //bytes
 		this.dropSelector 	= config.dropSelector 			|| '.drop_area';
 		this.dropArea 		= this.container.find(this.dropSelector);
-		this.destinationUrl 	= this.container.data('upload-url') 	|| config.destinationUrl;
-		this.input 		= this.container.find('input').first() 	|| config.input;
+		this.destinationUrl 	= config.destinationUrl 		|| this.container.data('upload-url');
+		this.input 		= config.input 				|| this.container.find('input').first();
 		this.postData 		= config.postData 			|| null;
 		this.start 		= config.start 				|| this.startDefault;
 		this.doUpload 		= config.doUpload 			|| function() {return true;};
@@ -328,6 +328,7 @@ $(function() {
 		
 		fileUploader = new FileUpload({
 			container: $(this),
+			input: $(this).find('input.image_upload_input').first(),
 			success: function(response) {
 					
 					loadingElement = this.container.find('.loading_container');
