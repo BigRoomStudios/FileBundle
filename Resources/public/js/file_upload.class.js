@@ -344,6 +344,9 @@ $(function() {
 						new_image = images.filter('.image-next');
 						new_image.data('file-id', fileObj.id);
 						new_image.data('delete-link', response.delete_link);
+						new_image.data('update-link', response.update_link);
+						new_image.data('title', response.file.title);
+						new_image.data('description', response.file.description);
 						new_image.removeClass('image-next').addClass('image-active');
 						new_image.css({backgroundImage: "url('"+response.thumb_url+"')"});
 						new_image.children('.caption').html(fileObj.name);
