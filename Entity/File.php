@@ -977,4 +977,20 @@ class File extends SuperEntity
     {
         return $this->root;
     }
+	
+	/**
+	 * Convert this file into a swift attachment
+	 * 
+	 * @return a swift attachment
+	 */
+	public function toSwiftAttachment() {
+		
+		//create the swift attachment
+		$attachment = \Swift_Attachment::fromPath($this->getAbsolutePath())->setFilename($this->getName());
+		
+		//return the attachment
+		return $attachment;
+		
+	}
+	
 }
