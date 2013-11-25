@@ -11,6 +11,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 
+use BRS\FileBundle\Form\FileType;
 use BRS\FileBundle\Entity\File;
 
 /**
@@ -76,6 +77,7 @@ class FileController extends WidgetController
 		
 		$values['thumb_url']     = $url;
 		$values['delete_link']   = $this->generateUrl('brs_file_delete',   array('id' => $file->getId()));
+		$values['update_link']   = $this->generateUrl('brs_file_update',   array('id' => $file->getId()));
 		$values['download_link'] = $this->generateUrl('brs_file_download', array('id' => $file->getId()));
 		$values['upload_date'] = $file->getCreatedTime()->format('M/d/Y');
 		
@@ -272,5 +274,42 @@ class FileController extends WidgetController
 			exit;	
 		}
 	}
+	
+	/**
+	 * Edits an existing File entity.
+	 * @Route("/file/update/{id}", requirements={"id" = "\d+"}, name="brs_file_update")
+	 * 
+	 */
+	public function updateAction(Request $request, $id)
+	{
+		$em = $this->getDoctrine()->getManager();
+	
+		$entity = $em->getRepository('BRSFileBundle:File')->find($id);
+	
+		if (!$entity) {
+			throw $this->createNotFoundException('Unable to find File entity.');
+		}
+	
+		$editForm = $this->createForm(new FileType(), $entity, array('csrf_protection' => false));
+		
+		$editForm->bind($request);
+	
+		if ($editForm->isValid()) {
+			$em->persist($entity);
+			$em->flush();
+	    
+			$response = array('success'=>true);
+		} else {
+			$message = BRS::get_form_errors($editForm);
+			$response = array('success'=>false, 'message'=>$message);
+		}
+    
+		
+		$response = new Response(json_encode($response));
+		$response->headers->set('Content-Type', 'application/json');
+		
+		return $response;
+	}
+	
 	
 }

@@ -5,8 +5,8 @@ var FileUpload = Class.create({
 		this.maxFileSize 	= config.maxFileSize 			|| 0; //bytes
 		this.dropSelector 	= config.dropSelector 			|| '.drop_area';
 		this.dropArea 		= this.container.find(this.dropSelector);
-		this.destinationUrl 	= this.container.data('upload-url') 	|| config.destinationUrl;
-		this.input 		= this.container.find('input').first() 	|| config.input;
+		this.destinationUrl 	= config.destinationUrl 		|| this.container.data('upload-url');
+		this.input 		= config.input 				|| this.container.find('input').first();
 		this.postData 		= config.postData 			|| null;
 		this.start 		= config.start 				|| this.startDefault;
 		this.doUpload 		= config.doUpload 			|| function() {return true;};
@@ -200,10 +200,12 @@ var FileUpload = Class.create({
 
 var docBlocks = [];
 var imgBlocks = [];
+var docCb = function(){};
+var imgCb = function(){};
 $(function() {
 	
 
-	$('.property-block.documents').each(function() {
+	$('.property-block.documents').each(docCb = function() {
 		
 		$(this).on('dragover', function(e) {
 				
@@ -242,9 +244,9 @@ $(function() {
 								'<div class="document_preview">' 			+
 									'<div class="document_thumb">'			+
 										'<span class="icon-document"></span>'	+
+										'<div class="remove icon-trash"></div>' +
 									'</div>' 					+
 									'<div class="document_ext">' 			+
-										'<div class="remove icon-trash"></div>' +
 										'<span></span>' 			+
 									'</div>' 					+ 
 								'</div>' 						+ 
@@ -295,7 +297,7 @@ $(function() {
 	});
 	
 	
-	$('.property-block.photos').each(function() {
+	$('.property-block.photos').each(imgCb = function() {
 		
 		$(this).on('dragover', function(e) {
 				
@@ -326,6 +328,7 @@ $(function() {
 		
 		fileUploader = new FileUpload({
 			container: $(this),
+			input: $(this).find('input.image_upload_input').first(),
 			success: function(response) {
 					
 					loadingElement = this.container.find('.loading_container');
@@ -341,6 +344,9 @@ $(function() {
 						new_image = images.filter('.image-next');
 						new_image.data('file-id', fileObj.id);
 						new_image.data('delete-link', response.delete_link);
+						new_image.data('update-link', response.update_link);
+						new_image.data('title', response.file.title);
+						new_image.data('description', response.file.description);
 						new_image.removeClass('image-next').addClass('image-active');
 						new_image.css({backgroundImage: "url('"+response.thumb_url+"')"});
 						new_image.children('.caption').html(fileObj.name);
