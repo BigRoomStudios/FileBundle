@@ -61,27 +61,39 @@ class FileController extends WidgetController
 		
 		$file_repo = $this->getRepository('BRSFileBundle:File');
 		
-		$values = $file_repo->hanldeUploadRequest($request, $form, $directory);
-		$file = $values['file'];
-		
-		if ($file->isImage()) {
-			$url = $this->generateUrl('brs_file_file_image', array(
-				'id' => $file->getId(),
-				'width' => $file->getWidth(),
-				'height' => $file->getHeight(),
-				'params' => 'quality:75/crop/'
-			));
-		} else {
-			$url = null;
+		try {
+			
+			$values = $file_repo->hanldeUploadRequest($request, $form, $directory);
+			$file = $values['file'];
+			
+			if ($file->isImage()) {
+				$url = $this->generateUrl('brs_file_file_image', array(
+					'id' => $file->getId(),
+					'width' => $file->getWidth(),
+					'height' => $file->getHeight(),
+					'params' => 'quality:75/crop/'
+				));
+			} else {
+				$url = null;
+			}
+			
+			$values['thumb_url']     = $url;
+			$values['delete_link']   = $this->generateUrl('brs_file_delete',   array('id' => $file->getId()));
+			$values['update_link']   = $this->generateUrl('brs_file_update',   array('id' => $file->getId()));
+			$values['download_link'] = $this->generateUrl('brs_file_download', array('id' => $file->getId()));
+			$values['upload_date'] = $file->getCreatedTime()->format('M/d/Y');
+			
+		} catch(\Exception $e) {
+			
+			$values = array(
+				'success' => false,
+				'errors' => $e->getMessage(),
+			);
+			
 		}
 		
-		$values['thumb_url']     = $url;
-		$values['delete_link']   = $this->generateUrl('brs_file_delete',   array('id' => $file->getId()));
-		$values['update_link']   = $this->generateUrl('brs_file_update',   array('id' => $file->getId()));
-		$values['download_link'] = $this->generateUrl('brs_file_download', array('id' => $file->getId()));
-		$values['upload_date'] = $file->getCreatedTime()->format('M/d/Y');
-		
 		return $this->jsonResponse($values);
+		
 	}
 	
 	

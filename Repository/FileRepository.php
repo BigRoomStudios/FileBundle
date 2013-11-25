@@ -95,9 +95,6 @@ class FileRepository extends NestedTreeRepository
 		
 		if ($request->getMethod() === 'POST') {
 			
-			
-			
-			
 			//strip everything but the csrf token from the request and just handle the file
 			
 			$form_post = $request->get('form');
@@ -116,48 +113,57 @@ class FileRepository extends NestedTreeRepository
 			
 			if ($form->isValid() && $file) {
 				
-				$file_obj = $form->getData();
-				
-				$em = $this->getEntityManager();
-				
-				$file_obj->file = $file;
-				
-				if ($directory) {
-					$file_obj->setParent($directory);
-				} else {
-					$parent_id = null;
+				//if the uploaded file is valid
+				if($file->isValid()) {
 					
-					if(isset($form_post['parent_id'])){
+					$file_obj = $form->getData();
+					
+					$em = $this->getEntityManager();
+					
+					$file_obj->file = $file;
+					
+					if ($directory) {
+						$file_obj->setParent($directory);
+					} else {
+						$parent_id = null;
 						
-						$parent_id = $form_post['parent_id'];
-					}
-					
-					if($parent_folder){
+						if(isset($form_post['parent_id'])){
 							
-						$parent = $this->getRootByName($parent_folder);			
+							$parent_id = $form_post['parent_id'];
+						}
 						
-						$parent_id = $parent->id;
+						if($parent_folder){
+								
+							$parent = $this->getRootByName($parent_folder);			
+							
+							$parent_id = $parent->id;
+						}
+						
+						if($parent_id){
+							
+							$parent = $em->getReference('\BRS\FileBundle\Entity\File', $parent_id);
+							
+							$file_obj->setParent($parent);
+						}
 					}
 					
-					if($parent_id){
-						
-						$parent = $em->getReference('\BRS\FileBundle\Entity\File', $parent_id);
-						
-						$file_obj->setParent($parent);
-					}
+					
+					$em->persist($file_obj);
+					
+					$em->flush();
+		
+					$values = array(
+						'status' => 'success',
+						'file' => $file_obj,
+					);
+					
+					return $values;
+					
+				} else {
+					
+					$this->throwUploadedFileException($file);
+					
 				}
-				
-				
-				$em->persist($file_obj);
-				
-				$em->flush();
-	
-				$values = array(
-					'status' => 'success',
-					'file' => $file_obj,
-				);
-				
-				return $values;
 				
 			}else{
 				
@@ -178,4 +184,65 @@ class FileRepository extends NestedTreeRepository
 		
 		return $values;
 	}
+	
+	/**
+	 * Checks the error number for the uploaded file against php's uploaded error messages
+	 * 
+	 * http://api.symfony.com/2.0/Symfony/Component/HttpFoundation/File/UploadedFile.html
+	 * http://php.net/manual/en/features.file-upload.errors.php
+	 */
+	private function throwUploadedFileException($file) {
+		
+		$max_size = $this->bytesToSize($file->getMaxFilesize());
+		
+		//php uploaded errors conversions
+		$php_uploaded_errors = array(
+			1 => "The uploaded file exceeds the maximum size of $max_size", //set in php.ini
+			2 => "The uploaded file exceeds the maximum size of $max_size", //set on the html form
+			3 => 'The uploaded file was only partially uploaded',
+			4 => 'No file was uploaded',
+			6 => 'Missing a temporary folder',
+			7 => 'Failed to write file to disk',
+			8 => 'A PHP extension stopped the file upload',
+		);
+		
+		//throw the exception with the appropriate message
+		throw new \Exception($php_uploaded_errors[$file->getError()]);
+		
+	}
+	
+	/**
+	 * Convert bytes to human readable format
+	 * 
+	 * taken from: http://codeaid.net/php/convert-size-in-bytes-to-a-human-readable-format-%28php%29
+	 * 
+	 * @param integer bytes Size in bytes to convert
+	 * @return string
+	 */
+	private function bytesToSize($bytes, $precision = 2)
+	{
+	    $kilobyte = 1024;
+	    $megabyte = $kilobyte * 1024;
+	    $gigabyte = $megabyte * 1024;
+	    $terabyte = $gigabyte * 1024;
+	   
+	    if (($bytes >= 0) && ($bytes < $kilobyte)) {
+	        return $bytes . ' B';
+	 
+	    } elseif (($bytes >= $kilobyte) && ($bytes < $megabyte)) {
+	        return round($bytes / $kilobyte, $precision) . ' KB';
+	 
+	    } elseif (($bytes >= $megabyte) && ($bytes < $gigabyte)) {
+	        return round($bytes / $megabyte, $precision) . ' MB';
+	 
+	    } elseif (($bytes >= $gigabyte) && ($bytes < $terabyte)) {
+	        return round($bytes / $gigabyte, $precision) . ' GB';
+	 
+	    } elseif ($bytes >= $terabyte) {
+	        return round($bytes / $terabyte, $precision) . ' TB';
+	    } else {
+	        return $bytes . ' B';
+	    }
+	}
+	
 }
